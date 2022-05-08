@@ -1,0 +1,185 @@
+// 2022-05-08 15:51:52
+#event properties (no comments/etc. here are saved)
+parent_index = -1;
+sprite_index = spr_GUI;
+uses_physics = false;
+
+#event alarm0 Set GMWINDOW invisible
+hobbl_com_window_show(hwnd_GM, api_sw_hide);
+
+#event step Main program GUI 
+/// End the game if window is closed
+if(!hobbl_com_window_exists(hwnd_main))game_end();
+
+/// Set GMWINDOW invisible
+//hobbl_com_window_show(int64(window_handle()), api_sw_hide);
+#section Signals
+
+cmd = hobbl_com_check_command(1); // slot 1 events
+
+if(cmd != 0)debug(cmd)
+
+
+switch(cmd)
+{
+    case cboxDevice:
+    var second = hobbl_com_check_secondarycommand(1);
+    if(second == api_cbn_selchange)
+    {
+        debug(hobbl_com_combobox_getsel(cboxDevice))
+        devicePort = hobbl_com_combobox_getsel(cboxDevice)
+    }
+    break;
+}
+
+#event other_game_start Window handles
+hwnd_GM = int64(window_handle());
+hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu, api_ws_ex_topmost);
+
+//ico_main = hobbl_com_resource_loadicon("main.ico")
+
+//ico_syringe =  hobbl_com_resource_loadicon("syringe.ico")
+
+//bm_injector = hobbl_com_resource_loadbitmap("icon.bmp")
+
+//ico_minimize = hobbl_com_resource_loadicon("minimize.ico")
+
+hobbl_com_window_settext(hwnd_main, "AmoTek Desktop");
+//hobbl_com_window_seticon(hwnd_main, ico_syringe);
+
+// Embed GM window into other window
+hobbl_com_window_setparent(hwnd_GM, hwnd_main)
+
+hobbl_com_window_setzorder(hwnd_GM, api_hwnd_top)
+
+hobbl_com_window_setpos(hwnd_GM, 0,270)
+#section Settings
+inTray = false;
+
+devicePort = 0;
+leftRed = 200;
+leftGreen = 0;
+leftBlue = 0;
+
+rightRed = 0;
+rightGreen = 200;
+rightBlue = 0;
+
+audioMultiplier = 1;
+brightnessMultiplier = 1;
+#section Controls
+hobbl_com_check_set(1, hwnd_main) // checking slot
+
+// Top bar thing
+stb_cont = hobbl_com_edit_create(hwnd_main, 5, 8, 250, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(stb_cont, 0,0);
+hobbl_com_edit_replaceselection(stb_cont, 0, "AmoTek Desktop - " + string(GM_version) + " Runtime ver. " + string(GM_runtime_version));
+
+main_area_begin = 32;
+// Device slot settings
+deviceSlotLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 80, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(deviceSlotLabel, 0,0);
+hobbl_com_edit_replaceselection(deviceSlotLabel, 0, "Device slot (0-4):");
+
+cboxDevice = hobbl_com_combobox_create(hwnd_main, 100,main_area_begin, 100, 20, api_cbs_hasstrings | api_cbs_dropdownlist | api_cbs_simple, 0);
+hobbl_com_combobox_addstring(cboxDevice, "Slot 0")
+hobbl_com_combobox_addstring(cboxDevice, "Slot 1")
+hobbl_com_combobox_addstring(cboxDevice, "Slot 2")
+hobbl_com_combobox_addstring(cboxDevice, "Slot 3")
+hobbl_com_combobox_addstring(cboxDevice, "Slot 4")
+
+// device slot end
+
+// Color settings
+main_area_begin = 100;
+colorLabelLeft = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 150, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(colorLabelLeft, 0,0);
+hobbl_com_edit_replaceselection(colorLabelLeft, 0, "Left side color (R/G/B), 0-255:");
+
+leftRedEdit = hobbl_com_combobox_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+leftGreenEdit = hobbl_com_combobox_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+leftBlueEdit = hobbl_com_combobox_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+
+main_area_begin = 150;
+colorLabelRight = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 150, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(colorLabelRight, 0,0);
+hobbl_com_edit_replaceselection(colorLabelRight, 0, "Right side color (R/G/B), 0-255:");
+
+rightRedEdit = hobbl_com_combobox_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+rightGreenEdit = hobbl_com_combobox_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+rightBlueEdit = hobbl_com_combobox_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+// end color
+// Amplitude Multiplier
+ampMultiLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+50, 125, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(ampMultiLabel, 0,0);
+hobbl_com_edit_replaceselection(ampMultiLabel, 0, "Audio multiplier (default: 1)");
+
+ampMultiEdit = hobbl_com_combobox_create(hwnd_main, 130, main_area_begin+45, 30, 18, api_cbs_simple , 0);
+
+// Brightness multiplier
+brightnessLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+80, 125, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(brightnessLabel, 0,0);
+hobbl_com_edit_replaceselection(brightnessLabel, 0, "Brightness (0.0 to 1.0)");
+
+brightnessLabel = hobbl_com_combobox_create(hwnd_main, 130, main_area_begin+75, 30, 18, api_cbs_simple, 0);
+
+
+//--------------------------------- Buttons
+main_area_begin = 230;
+// Apply button
+applyButton = hobbl_com_button_create(hwnd_main,  200,main_area_begin , 80, 20, 0,0);
+hobbl_com_control_settext(applyButton, "Apply!");
+
+// Control read only views
+area_begin_x = 300;
+area_begin_y = 32;
+
+//--------------------------------------------- Blinkstick sdk
+// connection
+bsConnectionLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+4, 200, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(bsConnectionLabel, 0,0);
+hobbl_com_edit_replaceselection(bsConnectionLabel, 0, "LED connection: unknown");
+// Initialized
+bsInitializedLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+22, 200, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(bsInitializedLabel, 0,0);
+hobbl_com_edit_replaceselection(bsInitializedLabel, 0, "LED initialized: unknown");
+
+//--------------------------------------------- audio reader
+// connection
+
+// connection
+arConnectionLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+50, 200, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(arConnectionLabel, 0,0);
+hobbl_com_edit_replaceselection(arConnectionLabel, 0, "AudioDevice connection: unknown");
+// Initialized
+arInitializedLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+50+18, 200, 20, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(arInitializedLabel, 0,0);
+hobbl_com_edit_replaceselection(arInitializedLabel, 0, "AudioDevice initialized: unknown");
+// ------------------------------------------- Settings
+// DeviceSlot label
+SettingsLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+85, 200, 18, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(SettingsLabel, 0,0);
+hobbl_com_edit_replaceselection(SettingsLabel, 0, "[Current settings]");
+
+// Left side RGB label
+setLeftRGBLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+105, 200, 18, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(setLeftRGBLabel, 0,0);
+hobbl_com_edit_replaceselection(setLeftRGBLabel, 0, "-> Left side RGB: (???,???,???)");
+
+// Right side RGB label
+setRightRGBLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+125, 200, 18, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(setRightRGBLabel, 0,0);
+hobbl_com_edit_replaceselection(setRightRGBLabel, 0, "-> Right side RGB: (???,???,???)");
+
+// Amplitude Multi
+setAmplitudeMultiLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+145, 200, 18, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(setAmplitudeMultiLabel, 0,0);
+hobbl_com_edit_replaceselection(setAmplitudeMultiLabel, 0, "-> Amplitude multiplier: ?");
+
+// Brightness Multi
+setBrightnessLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+165, 200, 18, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(setBrightnessLabel, 0,0);
+hobbl_com_edit_replaceselection(setBrightnessLabel, 0, "-> Brightness: ?");
+
+#section Create object
+instance_create(0,0,obj_ledcontrol);
