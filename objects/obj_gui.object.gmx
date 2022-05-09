@@ -207,6 +207,72 @@ switch(cmd)
         </arguments>
       </action>
     </event>
+    <event eventtype="7" enumb="62">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Update callback
+if(ds_map_find_value(async_load, "id") == downloadVersionFile) 
+{
+    //is downloaded, read from
+    if(async_load[?"status"] == 1)
+    {
+        debug("downloading")
+    }
+    
+    if(ds_map_find_value(async_load, "status") == 0)
+    {
+        debug("Finished download!")
+        if(file_exists(working_directory + "master_version.txt"))
+        {
+            var file = file_text_open_read(working_directory + "master_version.txt");
+            var verstring_master = file_text_read_string(file);
+            debug(verstring_master)
+            file_text_close(file);
+            
+            // Compare versions
+            debug("master ver: " + string(int64(verstring_master)))
+            debug("local ver: "+string(int64(APPVERSION)))
+            
+            if(int64(verstring_master) &gt; int64(APPVERSION))
+            {
+                /// Joa hier wird dann halt eigentlich das update installiert....
+// Einrückung muss so...
+var _infostring = "
+    UPDATE AVAILABLE
+-------------------------------------------------------------
+    Local Version: " + string(APPVERSION) + " (Compiled on "+ date_date_string(GM_build_date) + ")"+"
+    Master version: " + verstring_master + 
+"
+    The update does not get installed automatically.
+    This is just a friendly reminder.
+    Updates can be found on GitHub: 
+    https://github.com/sam-k0/AmoTek_Desktop
+"
+                
+                hobbl_com_dialog_showabout(0, "Update available",_infostring, 0)
+            }
+        }
+    }
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
     <event eventtype="7" enumb="2">
       <action>
         <libid>1</libid>
@@ -418,6 +484,29 @@ hobbl_com_edit_replaceselection(setErrstackLabel, 0, "-&gt; Error Stack: ?");
             <kind>1</kind>
             <string>/// Create object
 instance_create(0,0,obj_ledcontrol);
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Update app
+downloadVersionFile = -1;
+updateAppInit()
 </string>
           </argument>
         </arguments>

@@ -112,7 +112,7 @@
     <script>scripts\getCacheRed.gml</script>
     <script>scripts\getCacheGreen.gml</script>
     <script>scripts\getCacheBlue.gml</script>
-    <script>scripts\updateApp.gml</script>
+    <script>scripts\updateAppInit.gml</script>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fnt_overdrive</font>
@@ -127,7 +127,9 @@
     <room>rooms\room0</room>
     <room>rooms\room1</room>
   </rooms>
-  <constants number="2">
+  <constants number="4">
+    <constant name="MASTER_APPVERSION">"https://sam-k0.github.io/update/amotekdesktop/version.txt"</constant>
+    <constant name="APPVERSION">20220509</constant>
     <constant name="TRAY_WND_RESTORE">-1126</constant>
     <constant name="TRAY_NUM_CIRCLE">1</constant>
   </constants>
