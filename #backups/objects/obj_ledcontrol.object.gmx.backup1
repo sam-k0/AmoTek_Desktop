@@ -1,4 +1,4 @@
-// 2022-05-08 16:08:33
+// 2022-05-08 19:55:55
 #event properties (no comments/etc. here are saved)
 parent_index = -1;
 uses_physics = false;
@@ -87,8 +87,41 @@ enum mode {
 resetLights();
 
 MODE = 2;
-brightness = 0.1; // all rgb values get multiplied by this
-audioMultiplier = 12; // peak val gets multiplied by this
+brightness = 1; // all rgb values get multiplied by this
+audioMultiplier = 1; // peak val gets multiplied by this
+deviceSlot = 0;
+maxErrors = 5;
+
+
+// Cycle
+turn = 0;
+ledIndex = 0;
+
+// audio visualizer
+audioPeak = ar_get_peak();
+ledlist = ds_list_create();
+
+// Target Colors
+leftrgb[0] = 200;
+leftrg[1] = 0;
+leftrgb[2]= 0;
+
+rightrgb[0] = 0;
+rightrgb[1] = 0;
+rightrgb[2] = 200;
+
+// Color registers
+colors[0,0] = 0;
+colors[0,1] = 0;
+colors[0,2] = 0;
+// Fill colors
+for(var xx = 0; xx < 32; xx++)
+{
+    for(var yy = 0; yy < 2; yy++)
+    {
+        colors[xx,yy] = 0;
+    }
+}
 
 with(obj_gui) // Update gui to defaults
 {
@@ -98,25 +131,40 @@ with(obj_gui) // Update gui to defaults
     //brightness
     hobbl_com_edit_setsel(setBrightnessLabel, 0,999);
     hobbl_com_edit_replaceselection(setBrightnessLabel, 0, "-> Brightness: "+ string(obj_ledcontrol.brightness));
+    //errstack
+    hobbl_com_edit_setsel(setErrstackLabel, 0,999);
+    hobbl_com_edit_replaceselection(setErrstackLabel, 0, "-> Error Stack: "+ string(obj_ledcontrol.maxErrors));
+    
+    
+    //left rgb
+    hobbl_com_edit_setsel(setLeftRGBLabel, 0,999);
+    hobbl_com_edit_replaceselection(setLeftRGBLabel, 0, "-> Left side RGB: ("+string(obj_ledcontrol.leftrgb[0])+ ","+string(obj_ledcontrol.leftrgb[1])+","+string(obj_ledcontrol.leftrgb[2])+")");
+    
+   //right rgb
+    hobbl_com_edit_setsel(setRightRGBLabel, 0,999);
+    hobbl_com_edit_replaceselection(setRightRGBLabel, 0, "-> Right side RGB: ("+string(obj_ledcontrol.rightrgb[0])+ ","+string(obj_ledcontrol.rightrgb[1])+","+string(obj_ledcontrol.rightrgb[2])+")");
+}    
+
+
+
+
+for (i=0; i<32; i+=1)
+{
+    var correct = false
+    while(!correct)
+    {
+        correct = setLedLight(0,0,i,rightrgb[0],rightrgb[1],rightrgb[2])
+    }
 }
 
-// Cycle
-turn = 0;
-ledIndex = 0;
-
-// audio visualizer
-audioPeak = ar_get_peak();
-list_ledsToSet = ds_list_create();
-
-leftRGB[0] = 200;
-leftRGB[1] = 0;
-leftRGB[2] = 0;
-
-rightRGB[0] = 0;
-rightRGB[1] = 200;
-rightRGB[2] = 0;
 
 //alarm[0] = room_speed; cycle mode only
+
+#event destroy Free
+ar_release(); // release audio meter
+freeDevice(0); // Release LEDS
+
+
 
 #event alarm0 Cycle pattern
 
@@ -172,7 +220,7 @@ alarm[0] = 3;
 
 audioPeak = ar_get_peak()*audioMultiplier;
 
-debug("audioPeak: "+string(audioPeak));
+//debug("audioPeak: "+string(audioPeak));
 #section Pattern Update
 
 switch(MODE)
@@ -182,12 +230,12 @@ switch(MODE)
     
     case mode.audiobars: // audio responsive
         var normalizedPeak = round(audioPeak * 10); // scale 1-10
-        debug("Normalized: " + string(normalizedPeak));
+        //debug("Normalized: " + string(normalizedPeak));
         
         var maxAudioLed = power(normalizedPeak,1.5);
         maxAudioLed = clamp(maxAudioLed, 0, 31);
         
-        debug("MAL: " + string(int64(maxAudioLed)));
+        //debug("MAL: " + string(int64(maxAudioLed)));
         
         /***
         *
@@ -196,87 +244,77 @@ switch(MODE)
         ***/
         
         // Only continue if all LEDS have their color set accordingly
+        list = ds_list_create();
         
-        debug("Adding to list!");
-        for(var i = maxAudioLed; i < 32; i++) // add all leds
+        for (var i=maxAudioLed; i<32; i+=1)
         {
-            if(!in_range(getDeviceRed(0,i), leftRGB[0]*brightness, 10))
+            /*var correct = (in_range(getDeviceRed(deviceSlot, i), leftrgb[0]*brightness,10) && 
+                            in_range(getDeviceGreen(deviceSlot,i), leftrgb[1],10) && 
+                            in_range(getDeviceBlue(deviceSlot, i), leftrgb[2], 10));*/
+                            
+            var correct = (in_range(getCacheRed(i), leftrgb[0]*brightness,10) && 
+                            in_range(getCacheGreen(i), leftrgb[1]*brightness,10) && 
+                            in_range(getCacheBlue(i), leftrgb[2]*brightness, 10));
+                            
+            var maxerrs = maxErrors;
+            if(maxerrs < 100)
             {
-                ds_list_add(list_ledsToSet, i);
-            }
-        }
-        
-        // Loop over list and check
-        while(!ds_list_empty(list_ledsToSet))
-        {
-            printList(list_ledsToSet);
-            for(i = 0; i < ds_list_size(list_ledsToSet); i++)
-            {
-                // get led
-                led = list_ledsToSet[|i];
-                // should have red color (200,0,0), 10 tolerance
-                if(in_range(getDeviceRed(0,i), leftRGB[0]*brightness, 10))
+                while(!correct && maxerrs > 0)
                 {
-                    ds_list_delete(list_ledsToSet, i); // delete from list and reiterate
-                    break;
-                }
-                else
-                {
-                    setDeviceLighting(0,0,led, leftRGB[0]*brightness, leftRGB[1]*brightness, leftRGB[2]*brightness);
+                    maxerrs --;
+                    correct = setLedLight(deviceSlot, 0, i, leftrgb[0]*brightness, leftrgb[1]*brightness,leftrgb[2]*brightness);
                 }
             }
-        }
-        //ds_list_destroy(list_ledsToSet)
-        
+            else
+            {
+                while(!correct)
+                {
+                    correct = setLedLight(deviceSlot, 0, i, leftrgb[0]*brightness, leftrgb[1]*brightness,leftrgb[2]*brightness);
+                }
+            }
+            
+        };
         
         /**
         *
-        *        Do the same for the blue
+        *        Do the same for the right side
         *
         */
         // Only continue if all LEDS have their color set accordingly
-        //list_ledsToSet = ds_list_create();
-        debug("Adding to list! Blue!");
-        for(var i = 0; i < maxAudioLed; i++) // add all leds
+        for (i=0; i<maxAudioLed; i+=1)
         {
-            if(!in_range(getDeviceRed(0,i), rightRGB[0]*brightness, 10))
-            {
-                ds_list_add(list_ledsToSet, i);
-            }
-        }
+            /*var correct = (in_range(getDeviceRed(deviceSlot, i), rightrgb[0]*brightness,10) && 
+                            in_range(getDeviceGreen(deviceSlot,i), rightrgb[1],10)* && 
+                            in_range(getDeviceBlue(deviceSlot, i), rightrgb[2], 10));*/
+                            
+            var correct = (in_range(getCacheRed(i), rightrgb[0]*brightness,10) && 
+                            in_range(getCacheGreen(i), rightrgb[1]*brightness,10) && 
+                            in_range(getCacheBlue(i), rightrgb[2]*brightness, 10));
         
-        // Loop over list and check
-        while(!ds_list_empty(list_ledsToSet))
-        {
-            printList(list_ledsToSet);
-            for(i = 0; i < ds_list_size(list_ledsToSet); i++)
+            var maxerrs = maxErrors;
+            if(maxerrs < 100)
             {
-                // get led
-                led = list_ledsToSet[|i];
-                // should have blue color (0,0,200), 10 tolerance
-                if(in_range(getDeviceRed(0,i), rightRGB[0]*brightness, 10))
+                while(!correct && maxerrs > 0)
                 {
-                    ds_list_delete(list_ledsToSet, i); // delete from list and reiterate
-                    break;
+                    maxerrs --;
+                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness)
                 }
-                else
+            }
+            else
+            {
+                while(!correct)
                 {
-                    setDeviceLighting(0,0,led, rightRGB[0]*brightness,rightRGB[1]*brightness,rightRGB[2]*brightness);
+                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness)
                 }
             }
         }
-        //ds_list_destroy(list_ledsToSet)
         
         
     break;
 }
 
-#event other_game_end Free
-ar_release(); // release audio meter
-freeDevice(0); // Release LEDS
-
-// audio vis
-ds_list_destroy(list_ledsToSet);
+#event draw
+draw_text(x,y,"fps"+string(fps_real))
 
 #event keypress:vk_space Reset LIGHTS
 resetLights();

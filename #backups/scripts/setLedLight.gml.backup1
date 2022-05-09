@@ -1,3 +1,4 @@
+// 2022-05-08 19:52:13
 ///setLedLight(device,channel,index,r,g,b)
 var res = setDeviceLighting(argument[0],argument[1],argument[2],argument[3],argument[4],argument[5]);
 if(res)
@@ -6,4 +7,3 @@ obj_ledcontrol.colors[argument[2], 0] = argument[3];
 obj_ledcontrol.colors[argument[2], 1] = argument[4];
 obj_ledcontrol.colors[argument[2], 2] = argument[5];
 }
-return res;
