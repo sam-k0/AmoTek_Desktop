@@ -1,3 +1,6 @@
 [submodule "AmoTek_Light"]
 	path = AmoTek_Light
 	url = https://github.com/sam-k0/AmoTek_Light
+[submodule "win_audio_reader"]
+	path = win_audio_reader
+	url = https://github.com/sam-k0/win_audio_reader
