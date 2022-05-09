@@ -176,7 +176,7 @@ switch(cmd)
         savedrgb[2,1] = rightrgb[1]
         savedrgb[3,2] = rightrgb[2]
         
-        deviceSlot = hobbl_com_combobox_getsel(cboxDevice);
+        //deviceSlot = hobbl_com_combobox_getsel(cboxDevice);
        
     }
     
