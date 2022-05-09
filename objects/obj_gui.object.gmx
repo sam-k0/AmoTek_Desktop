@@ -147,7 +147,7 @@ switch(cmd)
         
         
         
-        if(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0))
+        /*if(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0))
         {
             
         }
@@ -167,7 +167,16 @@ switch(cmd)
         rightrgb[0] = int64(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0));
         rightrgb[1] = int64(hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0));
         rightrgb[2] = int64(hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0));
-        }
+        }*/
+        
+        leftrgb[0] = (int64(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0)));
+        leftrgb[1] = (int64(hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0)));
+        leftrgb[2] = (int64(hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0)));
+        
+        rightrgb[0] = (int64(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0)));
+        rightrgb[1] = (int64(hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0)));
+        rightrgb[2] = (int64(hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0)));
+        
         // Overdrive
         savedrgb[0,0] = leftrgb[0]
         savedrgb[0,1] = leftrgb[1]
