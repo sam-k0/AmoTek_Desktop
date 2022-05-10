@@ -247,29 +247,43 @@ if(ds_map_find_value(async_load, "id") == downloadVersionFile)
         debug("Finished download!")
         if(file_exists(working_directory + "master_version.txt"))
         {
+            // Read origin/master file
             var file = file_text_open_read(working_directory + "master_version.txt");
             var verstring_master = file_text_read_string(file);
+            var verstring_local = APPVERSION;
             debug(verstring_master)
             file_text_close(file);
             
+            // Read local file
+            if(file_exists(working_directory + "version.txt"))
+            {
+                file = file_text_open_read(working_directory + "version.txt");
+                verstring_local = file_text_read_string(file);
+                file_text_close(file);
+            }
+            
+            
             // Compare versions
             debug("master ver: " + string(int64(verstring_master)))
-            debug("local ver: "+string(int64(APPVERSION)))
+            debug("local ver: "+string(int64(verstring_local)))
             
-            if(int64(verstring_master) &gt; int64(APPVERSION))
+            if(int64(verstring_master) &gt; int64(verstring_local))
             {
                 /// Joa hier wird dann halt eigentlich das update installiert....
 // Einrückung muss so...
 var _infostring = "
     UPDATE AVAILABLE
 -------------------------------------------------------------
-    Local Version: " + string(APPVERSION) + " (Compiled on "+ date_date_string(GM_build_date) + ")"+"
+    Local Version: " + string(verstring_local) + " (Compiled on "+ date_date_string(GM_build_date) + ")"+"
     Master version: " + verstring_master + 
 "
     The update does not get installed automatically.
     This is just a friendly reminder.
     Updates can be found on GitHub: 
     https://github.com/sam-k0/AmoTek_Desktop
+    
+    If you do not want to receive these notifications anymore,
+    edit the 'version.txt' and set the value to 99999999999.
 "
                 
                 hobbl_com_dialog_showabout(0, "Update available",_infostring, 0)
@@ -303,9 +317,9 @@ var _infostring = "
 hwnd_GM = int64(window_handle());
 hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu,0/* api_ws_ex_topmost*/);
 // res
-ico_main = hobbl_com_resource_loadicon("circle.ico")
-ico_minimize = hobbl_com_resource_loadicon("minimize.ico")
-bm_main = hobbl_com_resource_loadbitmap("circle.bmp")
+ico_main = hobbl_com_resource_loadicon("res/circle.ico")
+ico_minimize = hobbl_com_resource_loadicon("res/minimize.ico")
+bm_main = hobbl_com_resource_loadbitmap("res/circle.bmp")
 // tray
 inTray = false;
 
@@ -345,7 +359,7 @@ hobbl_com_check_set(1, hwnd_main) // checking slot
 // Top bar thing
 stb_cont = hobbl_com_edit_create(hwnd_main, 5, 8, 250, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(stb_cont, 0,0);
-hobbl_com_edit_replaceselection(stb_cont, 0, "AmoTek Desktop - " + string(GM_version) + " Runtime ver. " + string(GM_runtime_version));
+hobbl_com_edit_replaceselection(stb_cont, 0, "AmoTek Desktop - " + string(getLocalVersion()) + " Runtime ver. " + string(GM_runtime_version));
 
 main_area_begin = 32;
 // Device slot settings
