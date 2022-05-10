@@ -94,6 +94,7 @@
     <extension index="0">extensions\blinkstickC</extension>
     <extension index="1">extensions\live_audio</extension>
     <extension index="2">extensions\Max winAPI 2</extension>
+    <extension index="3">extensions\autostart</extension>
   </NewExtensions>
   <sounds name="sound"/>
   <sprites name="sprites">

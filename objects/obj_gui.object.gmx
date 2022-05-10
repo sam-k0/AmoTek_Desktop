@@ -301,7 +301,7 @@ var _infostring = "
             <kind>1</kind>
             <string>/// Window handles
 hwnd_GM = int64(window_handle());
-hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu, api_ws_ex_topmost);
+hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu,0/* api_ws_ex_topmost*/);
 // res
 ico_main = hobbl_com_resource_loadicon("circle.ico")
 ico_minimize = hobbl_com_resource_loadicon("minimize.ico")
@@ -516,6 +516,42 @@ instance_create(0,0,obj_ledcontrol);
             <string>/// Update app
 downloadVersionFile = -1;
 updateAppInit()
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Autostart
+//autostart();
+if(!file_exists(working_directory + "startupconf"))
+{
+    if(hobbl_com_dialog_messagebox(0, "Add to startup?","Do you want to add this to your autostart programs?", api_mb_yesno) == 6) // yes
+    {
+        autostart();
+    }
+    else
+    {
+        // nope
+    }
+    var f = file_text_open_write(working_directory + "startupconf");
+    file_text_write_string(f, "Checkmate.")
+    file_text_close(f)
+}
 </string>
           </argument>
         </arguments>
