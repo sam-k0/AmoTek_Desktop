@@ -552,20 +552,74 @@ updateAppInit()
             <kind>1</kind>
             <string>/// Autostart
 //autostart();
-if(!file_exists(working_directory + "startupconf"))
+var conffile = working_directory + "startupconf";
+if(!file_exists(conffile))
 {
     if(hobbl_com_dialog_messagebox(0, "Add to startup?","Do you want to add this to your autostart programs?", api_mb_yesno) == 6) // yes
     {
+        removeAutostart();
         autostart();
     }
     else
     {
         // nope
+        removeAutostart();
     }
-    var f = file_text_open_write(working_directory + "startupconf");
-    file_text_write_string(f, "Checkmate.")
+    var f = file_text_open_write(conffile);
+    file_text_write_string(f, string(getLocalVersion()))
     file_text_close(f)
 }
+else
+if(file_exists(conffile))// Update
+{
+    var f = file_text_open_read(conffile)
+    var verstrFile = file_text_read_string(f); // read version for hkey
+    file_text_close(f)
+    
+    // compare 
+    if(int64(verstrFile) &lt; int64(getLocalVersion()))
+    {
+        // There was an update
+        if(hobbl_com_dialog_messagebox(0, "Seems like you installed an update! Should the new version be added to the autostart again? (Old version will be removed.)","Do you want to add this to your autostart programs?", api_mb_yesno) == 6) // yes
+        {
+            removeAutostart();
+            autostart();
+        }
+        else
+        {
+            // nope
+            removeAutostart();
+        }
+        // Write to the file
+        var f = file_text_open_write(conffile);
+        file_text_write_string(f, string(getLocalVersion()))
+        file_text_close(f)
+    }
+    
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// drimscrom prensence
+//gmrpc_init("974552575716237342");
+//gmrpc_setPresence("In settings", "Version "+string(getLocalVersion()), "icon512","");
 </string>
           </argument>
         </arguments>
