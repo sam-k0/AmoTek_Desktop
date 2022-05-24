@@ -84,12 +84,26 @@ if(cmd != 0)debug(cmd)
 
 switch(cmd)
 {
-    case cboxDevice:
+    case cboxMode:
     var second = hobbl_com_check_secondarycommand(1);
     if(second == api_cbn_selchange)
     {
-        debug(hobbl_com_combobox_getsel(cboxDevice))
-        devicePort = hobbl_com_combobox_getsel(cboxDevice)
+        debug(hobbl_com_combobox_getsel(cboxMode))
+        var _mode = hobbl_com_combobox_getsel(cboxMode)
+        
+        switch(_mode)// mode here can be different than mode in enum
+        {
+            case 0: // Audio (defualt)
+            obj_ledcontrol.MODE = mode.audiobars;
+            debug("Mode= audiobars")
+            break;
+            
+            case 1: // ambi
+            obj_ledcontrol.MODE = mode.ambi;
+            debug("Mode= ambi")
+            break;
+        }
+        
     }
     break;
     
@@ -127,7 +141,7 @@ switch(cmd)
     
     with(obj_ledcontrol)
     {
-        MODE = 2;
+        //MODE = ;
         if(hobbl_com_edit_getline(obj_gui.brightnessEdit, 0) != "")
         {
             brightness = real(hobbl_com_edit_getline(obj_gui.brightnessEdit, 0));
@@ -322,6 +336,8 @@ ico_minimize = hobbl_com_resource_loadicon("res/minimize.ico")
 bm_main = hobbl_com_resource_loadbitmap("res/circle.bmp")
 // tray
 inTray = false;
+// mode
+
 
 hobbl_com_window_settext(hwnd_main, "AmoTek Desktop");
 
@@ -365,15 +381,12 @@ main_area_begin = 32;
 // Device slot settings
 deviceSlotLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 80, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(deviceSlotLabel, 0,0);
-hobbl_com_edit_replaceselection(deviceSlotLabel, 0, "Device slot (0-4):");
+hobbl_com_edit_replaceselection(deviceSlotLabel, 0, "Mode:");
 
-cboxDevice = hobbl_com_combobox_create(hwnd_main, 100,main_area_begin, 100, 20, api_cbs_hasstrings | api_cbs_dropdownlist | api_cbs_simple, 0);
-hobbl_com_combobox_addstring(cboxDevice, "Slot 0")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 1")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 2")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 3")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 4")
-
+cboxMode = hobbl_com_combobox_create(hwnd_main, 100 ,main_area_begin, 100, 20, api_cbs_hasstrings | api_cbs_dropdownlist | api_cbs_simple, 0);
+hobbl_com_combobox_addstring(cboxMode, "Audio")
+hobbl_com_combobox_addstring(cboxMode, "Ambi")
+hobbl_com_combobox_setsel(cboxMode, 0);
 // device slot end
 // maxerrs
 
@@ -620,6 +633,35 @@ if(file_exists(conffile))// Update
             <string>/// drimscrom prensence
 //gmrpc_init("974552575716237342");
 //gmrpc_setPresence("In settings", "Version "+string(getLocalVersion()), "icon512","");
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// GMAMBI
+gmambi_init();
+
+//gmambi_print(700,700);
+debug("cols")
+debug(gmambi_pixel_red(1918,1078));
+debug(gmambi_pixel_green(1918,1078));
+debug(gmambi_pixel_blue(1918,1078));
+
 </string>
           </argument>
         </arguments>

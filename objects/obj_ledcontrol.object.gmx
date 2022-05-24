@@ -143,22 +143,28 @@ with(obj_gui)
             <kind>1</kind>
             <string>/// pattern vars
 enum mode {
-    cycle = 1,
-    audiobars = 2
+    audiobars,
+    ambi,
+    cycle
 }
 
 resetLights();
 
-MODE = 2;
+MODE = mode.audiobars;
 brightness = 1; // all rgb values get multiplied by this
 audioMultiplier = 1; // peak val gets multiplied by this
 deviceSlot = 0;
+// audiobars
 maxErrors = 5;
 maxAudioLed = 0;
 
 // Cycle
 turn = 0;
 ledIndex = 0;
+
+// Ambi
+AMBICHECKCOOLDOWN= 32;
+ambiCheckCooldown = AMBICHECKCOOLDOWN;
 
 // audio visualizer
 audioPeak = ar_get_peak();
@@ -228,8 +234,6 @@ for (i=0; i&lt;32; i+=1)
     }
 }
 
-
-//alarm[0] = room_speed; cycle mode only
 </string>
           </argument>
         </arguments>
@@ -254,6 +258,7 @@ for (i=0; i&lt;32; i+=1)
             <kind>1</kind>
             <string>/// Free
 ar_release(); // release audio meter
+gmambi_exit(); // release gmambi dc
 freeDevice(0); // Release LEDS
 
 
@@ -378,10 +383,7 @@ audioPeak = ar_get_peak()*audioMultiplier;
             <string>/// Pattern Update
 
 switch(MODE)
-{
-    case mode.cycle: // Cycle...
-    break;
-    
+{   
     case mode.audiobars: // audio responsive
         var normalizedPeak = round(audioPeak * 10); // scale 1-10
         //debug("Normalized: " + string(normalizedPeak));
@@ -392,21 +394,6 @@ switch(MODE)
         //OVERDRIVE!!!!!!!!!!!!!!
         if(maxAudioLed &gt; 30)
         {
-            /*leftrgb[0] += 30;
-            leftrgb[1] += 100;
-            leftrgb[2] += 150;
-            
-            leftrgb[0] %= 255;
-            leftrgb[1] %= 255;
-            leftrgb[2] %= 255;
-            
-            rightrgb[0] += 30;
-            rightrgb[1] += 100;
-            rightrgb[2] += 150;
-            
-            rightrgb[0] %= 255;
-            rightrgb[1] %= 255;
-            rightrgb[2] %= 255;*/
             
             leftrgb[0] = 255*irandom(1);
             leftrgb[1] = 255*irandom(1);
@@ -500,7 +487,39 @@ switch(MODE)
             }
         }
         
+    break;
+    
+    case mode.ambi: // ambilight
+    var dw = display_get_width();
+    var dh = display_get_height();
+    
+    var stepcnt = 4;
+    var stepwidth = dw/stepcnt;
+    var ycheck = 32;
+    
+    ambiCheckCooldown -= (delta_time/1000000)*room_speed;
+    
+    if(ambiCheckCooldown &lt;= 0)
+    {
+        //lastled %= 32
+        ambiCheckCooldown = AMBICHECKCOOLDOWN;
         
+        for(i = 0; i &lt; stepcnt; i++)
+        {
+            ycheck = 32+(i*32%200);
+            var red = gmambi_pixel_red(i*stepwidth,ycheck);
+            var green =  gmambi_pixel_green(i*stepwidth,ycheck);
+            var blue = gmambi_pixel_blue(i*stepwidth,ycheck);
+            
+            for(j = i*(32/stepcnt) ; j &lt; i*(32/stepcnt)+stepcnt; j++)
+            {
+                debug(string(j)+"/"+string(i*stepcnt+stepcnt))
+                setLedLight(deviceSlot, 0, j, red, green, blue);
+            }
+            
+        }       
+    }
+    
     break;
 }
 </string>
