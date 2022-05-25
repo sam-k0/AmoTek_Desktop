@@ -257,6 +257,16 @@ for (i=0; i&lt;32; i+=1)
           <argument>
             <kind>1</kind>
             <string>/// Free
+var success = false;
+for(var i = 0; i &lt; 32; i++)
+{
+    success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    while(!success)
+    {
+        success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    }
+}
+
 ar_release(); // release audio meter
 gmambi_exit(); // release gmambi dc
 freeDevice(0); // Release LEDS
@@ -510,11 +520,13 @@ switch(MODE)
             var red = gmambi_pixel_red(i*stepwidth,ycheck);
             var green =  gmambi_pixel_green(i*stepwidth,ycheck);
             var blue = gmambi_pixel_blue(i*stepwidth,ycheck);
+            var ledsector = (32/stepcnt);
             
-            for(j = i*(32/stepcnt) ; j &lt; i*(32/stepcnt)+stepcnt; j++)
+            for(var j = (ledsector*i) ; j &lt; (ledsector*i)+ledsector; j++)
             {
-                debug(string(j)+"/"+string(i*stepcnt+stepcnt))
-                setLedLight(deviceSlot, 0, j, red, green, blue);
+                var ledindex = j;
+                debug(string(ledindex))
+                setLedLight(deviceSlot, 0, ledindex, red, green, blue);
             }
             
         }       
@@ -522,6 +534,44 @@ switch(MODE)
     
     break;
 }
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="7" enumb="3">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Free
+var success = false;
+for(var i = 0; i &lt; 32; i++)
+{
+    success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    while(!success)
+    {
+        success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    }
+}
+
+ar_release(); // release audio meter
+gmambi_exit(); // release gmambi dc
+freeDevice(0); // Release LEDS
+
+
 </string>
           </argument>
         </arguments>
