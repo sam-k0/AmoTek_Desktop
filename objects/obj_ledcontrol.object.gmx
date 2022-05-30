@@ -162,11 +162,20 @@ maxAudioLed = 0;
 turn = 0;
 ledIndex = 0;
 
-// Ambi
-AMBICHECKCOOLDOWN= 32;
+//------ Ambi
+AMBICHECKCOOLDOWN= 2;
 ambiCheckCooldown = AMBICHECKCOOLDOWN;
 
-// audio visualizer
+ambicolors[0,1] = 0; // ambicolors[ledindex, r/g/b]
+for(var i = 0; i &lt; 32; i++) // Fill with default values
+{
+    for(var j = 0; j &lt; 2; j++)
+    {
+        ambicolors[i, j] = 0; // Init with 0
+    }
+}
+
+//----- audio visualizer
 audioPeak = ar_get_peak();
 ledlist = ds_list_create();
 
@@ -178,15 +187,13 @@ leftrgb[2]= 0;
 rightrgb[0] = 0;
 rightrgb[1] = 0;
 rightrgb[2] = 200;
-
-savedrgb[0,0] = leftrgb[0]
-savedrgb[0,1] = leftrgb[1]
-savedrgb[0,2] = leftrgb[2]
-savedrgb[1,0] = rightrgb[0]
-savedrgb[2,1] = rightrgb[1]
-savedrgb[3,2] = rightrgb[2]
-
-
+// These are the user defined color values
+savedrgb[0,0] = leftrgb[0];
+savedrgb[0,1] = leftrgb[1];
+savedrgb[0,2] = leftrgb[2];
+savedrgb[1,0] = rightrgb[0];
+savedrgb[2,1] = rightrgb[1];
+savedrgb[3,2] = rightrgb[2];
 // Color registers
 colors[0,0] = 0;
 colors[0,1] = 0;
@@ -196,7 +203,7 @@ for(var xx = 0; xx &lt; 32; xx++)
 {
     for(var yy = 0; yy &lt; 2; yy++)
     {
-        colors[xx,yy] = 0;
+       colors[xx,yy] = 0;
     }
 }
 
@@ -335,7 +342,7 @@ switch(turn)
 }
 
 
-setDeviceLighting(0,0,ledIndex, lights[0]%255, lights[1]%255, lights[2]%255)
+setDeviceLighting(0,0,ledIndex, lights[0]%255, lights[1]%255, lights[2]%255);
 
 //setDeviceLighting(0,0,ledIndex, irandom(255), irandom(50),irandom(100))
 
@@ -436,10 +443,6 @@ switch(MODE)
         
         for (var i=maxAudioLed; i&lt;32; i+=1)
         {
-            /*var correct = (in_range(getDeviceRed(deviceSlot, i), leftrgb[0]*brightness,10) &amp;&amp; 
-                            in_range(getDeviceGreen(deviceSlot,i), leftrgb[1],10) &amp;&amp; 
-                            in_range(getDeviceBlue(deviceSlot, i), leftrgb[2], 10));*/
-                            
             var correct = (in_range(getCacheRed(i), leftrgb[0]*brightness,10) &amp;&amp; 
                             in_range(getCacheGreen(i), leftrgb[1]*brightness,10) &amp;&amp; 
                             in_range(getCacheBlue(i), leftrgb[2]*brightness, 10));
@@ -471,10 +474,6 @@ switch(MODE)
         // Only continue if all LEDS have their color set accordingly
         for (i=0; i&lt;maxAudioLed; i+=1)
         {
-            /*var correct = (in_range(getDeviceRed(deviceSlot, i), rightrgb[0]*brightness,10) &amp;&amp; 
-                            in_range(getDeviceGreen(deviceSlot,i), rightrgb[1],10)* &amp;&amp; 
-                            in_range(getDeviceBlue(deviceSlot, i), rightrgb[2], 10));*/
-                            
             var correct = (in_range(getCacheRed(i), rightrgb[0]*brightness,10) &amp;&amp; 
                             in_range(getCacheGreen(i), rightrgb[1]*brightness,10) &amp;&amp; 
                             in_range(getCacheBlue(i), rightrgb[2]*brightness, 10));
@@ -485,14 +484,14 @@ switch(MODE)
                 while(!correct &amp;&amp; maxerrs &gt; 0)
                 {
                     maxerrs --;
-                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness)
+                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness);
                 }
             }
             else
             {
                 while(!correct)
                 {
-                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness)
+                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness);
                 }
             }
         }
@@ -511,26 +510,51 @@ switch(MODE)
     
     if(ambiCheckCooldown &lt;= 0)
     {
-        //lastled %= 32
         ambiCheckCooldown = AMBICHECKCOOLDOWN;
         
+        // query screen colors and add to cache
         for(i = 0; i &lt; stepcnt; i++)
         {
-            ycheck = 32+(i*32%200);
-            var red = gmambi_pixel_red(i*stepwidth,ycheck);
-            var green =  gmambi_pixel_green(i*stepwidth,ycheck);
-            var blue = gmambi_pixel_blue(i*stepwidth,ycheck);
+            ycheck = display_get_height()/4; //32+(i*32%200);
+            gmambi_add_cache(i*stepwidth,ycheck); // add to cache
+        }
+        
+        for(i = 0; i &lt; gmambi_get_stacksize(); i++) // loop all cached entries
+        {
+            
+            var red = gmambi_get_red_at(i);
+            var green =  gmambi_get_green_at(i);
+            var blue = gmambi_get_blue_at(i);
             var ledsector = (32/stepcnt);
             
             for(var j = (ledsector*i) ; j &lt; (ledsector*i)+ledsector; j++)
             {
                 var ledindex = j;
-                debug(string(ledindex))
-                setLedLight(deviceSlot, 0, ledindex, red, green, blue);
+                debug(string(ledindex)); // debug print of led
+                // Check if already right color (with tolerance)
+                var correct = (in_range( ambicolors[ledindex, 0],red*brightness,10) &amp;&amp; 
+                                in_range(ambicolors[ledindex, 1], green*brightness,10) &amp;&amp; 
+                                in_range(ambicolors[ledindex, 2], blue*brightness, 10));
+                        
+                if(correct)  // If the light is already correct (in cache) continue and do nothing  
+                {
+                    continue;
+                }
+                
+                // try changing the light of the LED
+                if(setLedLight(deviceSlot, 0, ledindex, red*brightness, green*brightness, blue*brightness))
+                {
+                    // the light was updated
+                    // store in cache (with brightness applied!)
+                    ambicolors[ledindex, 0] = red*brightness;
+                    ambicolors[ledindex, 1] = green*brightness;
+                    ambicolors[ledindex, 2] = blue*brightness;
+                }
             }
-            
         }       
+        gmambi_cache_clear(); // reset the cache
     }
+    
     
     break;
 }

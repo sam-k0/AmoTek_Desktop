@@ -95,12 +95,14 @@ switch(cmd)
         {
             case 0: // Audio (defualt)
             obj_ledcontrol.MODE = mode.audiobars;
-            debug("Mode= audiobars")
+            debug("Mode= audiobars");
             break;
             
             case 1: // ambi
             obj_ledcontrol.MODE = mode.ambi;
-            debug("Mode= ambi")
+            debug("Mode= ambi");
+            // Reset ambilight colors cache
+            resetAmbiColors(obj_ledcontrol);
             break;
         }
         

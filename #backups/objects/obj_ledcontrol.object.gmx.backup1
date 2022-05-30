@@ -1,10 +1,9 @@
-// 2022-05-08 19:55:55
+// 2022-05-30 22:21:34
 #event properties (no comments/etc. here are saved)
 parent_index = -1;
 uses_physics = false;
 
-#event create bs init
-// init
+#event create LED init
 var _string = "";
 if(checkConnection(2) == 4 && initEx(0))
 {
@@ -13,6 +12,7 @@ if(checkConnection(2) == 4 && initEx(0))
 else
 {
     _string = "LED initialized: error";
+    hobbl_com_dialog_showabout(0, "Error", "The communication library could not be initialized. Is the DLL present?",obj_gui.bm_main)
 }
 
 
@@ -30,6 +30,7 @@ if(findDevice() != -1)
 else
 {
     _string = "LED connection: error";
+     hobbl_com_dialog_showabout(0, "Error", "The device could not be initialized. Is the device connected?",obj_gui.bm_main)
 }
 
 
@@ -80,36 +81,57 @@ with(obj_gui)
 }
 #section pattern vars
 enum mode {
-    cycle = 1,
-    audiobars = 2
+    audiobars,
+    ambi,
+    cycle
 }
 
 resetLights();
 
-MODE = 2;
+MODE = mode.audiobars;
 brightness = 1; // all rgb values get multiplied by this
 audioMultiplier = 1; // peak val gets multiplied by this
 deviceSlot = 0;
+// audiobars
 maxErrors = 5;
-
+maxAudioLed = 0;
 
 // Cycle
 turn = 0;
 ledIndex = 0;
 
-// audio visualizer
+//------ Ambi
+AMBICHECKCOOLDOWN= 2;
+ambiCheckCooldown = AMBICHECKCOOLDOWN;
+
+ambicolors[0,1] = 0; // ambicolors[ledindex, r/g/b]
+for(var i = 0; i < 32; i++) // Fill with default values
+{
+    for(var j = 0; j < 2; j++)
+    {
+        ambicolors[i, j] = 0; // Init with 0
+    }
+}
+
+//----- audio visualizer
 audioPeak = ar_get_peak();
 ledlist = ds_list_create();
 
 // Target Colors
 leftrgb[0] = 200;
-leftrg[1] = 0;
+leftrgb[1] = 0;
 leftrgb[2]= 0;
 
 rightrgb[0] = 0;
 rightrgb[1] = 0;
 rightrgb[2] = 200;
-
+// These are the user defined color values
+savedrgb[0,0] = leftrgb[0];
+savedrgb[0,1] = leftrgb[1];
+savedrgb[0,2] = leftrgb[2];
+savedrgb[1,0] = rightrgb[0];
+savedrgb[2,1] = rightrgb[1];
+savedrgb[3,2] = rightrgb[2];
 // Color registers
 colors[0,0] = 0;
 colors[0,1] = 0;
@@ -119,7 +141,7 @@ for(var xx = 0; xx < 32; xx++)
 {
     for(var yy = 0; yy < 2; yy++)
     {
-        colors[xx,yy] = 0;
+       colors[xx,yy] = 0;
     }
 }
 
@@ -158,10 +180,19 @@ for (i=0; i<32; i+=1)
 }
 
 
-//alarm[0] = room_speed; cycle mode only
-
 #event destroy Free
+var success = false;
+for(var i = 0; i < 32; i++)
+{
+    success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    while(!success)
+    {
+        success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    }
+}
+
 ar_release(); // release audio meter
+gmambi_exit(); // release gmambi dc
 freeDevice(0); // Release LEDS
 
 
@@ -207,7 +238,7 @@ switch(turn)
 }
 
 
-setDeviceLighting(0,0,ledIndex, lights[0]%255, lights[1]%255, lights[2]%255)
+setDeviceLighting(0,0,ledIndex, lights[0]%255, lights[1]%255, lights[2]%255);
 
 //setDeviceLighting(0,0,ledIndex, irandom(255), irandom(50),irandom(100))
 
@@ -224,16 +255,35 @@ audioPeak = ar_get_peak()*audioMultiplier;
 #section Pattern Update
 
 switch(MODE)
-{
-    case mode.cycle: // Cycle...
-    break;
-    
+{   
     case mode.audiobars: // audio responsive
         var normalizedPeak = round(audioPeak * 10); // scale 1-10
         //debug("Normalized: " + string(normalizedPeak));
         
         var maxAudioLed = power(normalizedPeak,1.5);
         maxAudioLed = clamp(maxAudioLed, 0, 31);
+        
+        //OVERDRIVE!!!!!!!!!!!!!!
+        if(maxAudioLed > 30)
+        {
+            
+            leftrgb[0] = 255*irandom(1);
+            leftrgb[1] = 255*irandom(1);
+            leftrgb[2] = 255*irandom(1);
+            
+            rightrgb[0] = 255*irandom(1);
+            rightrgb[1] = 255*irandom(1);
+            rightrgb[2] = 255*irandom(1);
+        }
+        else
+        {
+            leftrgb[0] = savedrgb[0,0];
+            leftrgb[1]= savedrgb[0,1];
+            leftrgb[2] = savedrgb[0,2];
+            rightrgb[0]= savedrgb[1,0];
+            rightrgb[1]= savedrgb[2,1];
+            rightrgb[2]= savedrgb[3,2]; 
+        }
         
         //debug("MAL: " + string(int64(maxAudioLed)));
         
@@ -248,10 +298,6 @@ switch(MODE)
         
         for (var i=maxAudioLed; i<32; i+=1)
         {
-            /*var correct = (in_range(getDeviceRed(deviceSlot, i), leftrgb[0]*brightness,10) && 
-                            in_range(getDeviceGreen(deviceSlot,i), leftrgb[1],10) && 
-                            in_range(getDeviceBlue(deviceSlot, i), leftrgb[2], 10));*/
-                            
             var correct = (in_range(getCacheRed(i), leftrgb[0]*brightness,10) && 
                             in_range(getCacheGreen(i), leftrgb[1]*brightness,10) && 
                             in_range(getCacheBlue(i), leftrgb[2]*brightness, 10));
@@ -283,10 +329,6 @@ switch(MODE)
         // Only continue if all LEDS have their color set accordingly
         for (i=0; i<maxAudioLed; i+=1)
         {
-            /*var correct = (in_range(getDeviceRed(deviceSlot, i), rightrgb[0]*brightness,10) && 
-                            in_range(getDeviceGreen(deviceSlot,i), rightrgb[1],10)* && 
-                            in_range(getDeviceBlue(deviceSlot, i), rightrgb[2], 10));*/
-                            
             var correct = (in_range(getCacheRed(i), rightrgb[0]*brightness,10) && 
                             in_range(getCacheGreen(i), rightrgb[1]*brightness,10) && 
                             in_range(getCacheBlue(i), rightrgb[2]*brightness, 10));
@@ -297,24 +339,120 @@ switch(MODE)
                 while(!correct && maxerrs > 0)
                 {
                     maxerrs --;
-                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness)
+                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness);
                 }
             }
             else
             {
                 while(!correct)
                 {
-                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness)
+                    correct = setLedLight(deviceSlot, 0, i, rightrgb[0]*brightness, rightrgb[1]*brightness,rightrgb[2]*brightness);
                 }
             }
         }
         
+    break;
+    
+    case mode.ambi: // ambilight
+    var dw = display_get_width();
+    var dh = display_get_height();
+    
+    var stepcnt = 4;
+    var stepwidth = dw/stepcnt;
+    var ycheck = 32;
+    
+    ambiCheckCooldown -= (delta_time/1000000)*room_speed;
+    
+    if(ambiCheckCooldown <= 0)
+    {
+        ambiCheckCooldown = AMBICHECKCOOLDOWN;
         
+        // query screen colors and add to cache
+        for(i = 0; i < stepcnt; i++)
+        {
+            ycheck = display_get_height()/4; //32+(i*32%200);
+            gmambi_add_cache(i*stepwidth,ycheck); // add to cache
+        }
+        
+        for(i = 0; i < gmambi_get_stacksize(); i++) // loop all cached entries
+        {
+            
+            var red = gmambi_get_red_at(i);
+            var green =  gmambi_get_green_at(i);
+            var blue = gmambi_get_blue_at(i);
+            var ledsector = (32/stepcnt);
+            
+            for(var j = (ledsector*i) ; j < (ledsector*i)+ledsector; j++)
+            {
+                var ledindex = j;
+                debug(string(ledindex)); // debug print of led
+                // Check if already right color (with tolerance)
+                var correct = (in_range( ambicolors[ledindex, 0],red*brightness,10) && 
+                                in_range(ambicolors[ledindex, 1], green*brightness,10) && 
+                                in_range(ambicolors[ledindex, 2], blue*brightness, 10));
+                        
+                if(correct)  // If the light is already correct (in cache) continue and do nothing  
+                {
+                    continue;
+                }
+                
+                // try changing the light of the LED
+                if(setLedLight(deviceSlot, 0, ledindex, red*brightness, green*brightness, blue*brightness))
+                {
+                    // the light was updated
+                    // store in cache (with brightness applied!)
+                    ambicolors[ledindex, 0] = red*brightness;
+                    ambicolors[ledindex, 1] = green*brightness;
+                    ambicolors[ledindex, 2] = blue*brightness;
+                }
+            }
+        }       
+        gmambi_cache_clear(); // reset the cache
+    }
+    
     break;
 }
 
-#event draw
+#event other_game_end Free
+var success = false;
+for(var i = 0; i < 32; i++)
+{
+    success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    while(!success)
+    {
+        success = setLedLight(deviceSlot, 0, i, 0,0,0);
+    }
+}
+
+ar_release(); // release audio meter
+gmambi_exit(); // release gmambi dc
+freeDevice(0); // Release LEDS
+
+
+
+#event draw draw preview and render
+draw_set_font(fnt_overdrive)
+
+sprw = sprite_get_width(spr_ledicon);
+for (i=0; i<32; i+=1)
+{
+    draw_sprite_ext(spr_ledicon, 0, (room_width - sprw-5)-sprw*i, room_height/2,1,1,0,make_color_rgb(colors[i,0],colors[i,1],colors[i,2] ),brightness)
+    draw_set_colour(-1)
+};
+
+// Text
+draw_set_color(c_white)
 draw_text(x,y,"fps"+string(fps_real))
+
+
+// OVERDRIVE
+if(maxAudioLed > 30)
+{
+    draw_set_halign(fa_center)
+    draw_text(room_width/2, room_height/2-5, "OVERLOAD")
+    draw_set_halign(fa_left)
+}
+
 
 #event keypress:vk_space Reset LIGHTS
 resetLights();

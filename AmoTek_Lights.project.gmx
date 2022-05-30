@@ -118,6 +118,7 @@
     <script>scripts\getCacheBlue.gml</script>
     <script>scripts\updateAppInit.gml</script>
     <script>scripts\getLocalVersion.gml</script>
+    <script>scripts\resetAmbiColors.gml</script>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fnt_overdrive</font>

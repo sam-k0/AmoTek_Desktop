@@ -1,4 +1,4 @@
-// 2022-05-08 17:40:38
+// 2022-05-30 22:14:10
 #event properties (no comments/etc. here are saved)
 parent_index = -1;
 sprite_index = spr_GUI;
@@ -22,47 +22,165 @@ if(cmd != 0)debug(cmd)
 
 switch(cmd)
 {
-    case cboxDevice:
+    case cboxMode:
     var second = hobbl_com_check_secondarycommand(1);
     if(second == api_cbn_selchange)
     {
-        debug(hobbl_com_combobox_getsel(cboxDevice))
-        devicePort = hobbl_com_combobox_getsel(cboxDevice)
+        debug(hobbl_com_combobox_getsel(cboxMode))
+        var _mode = hobbl_com_combobox_getsel(cboxMode)
+        
+        switch(_mode)// mode here can be different than mode in enum
+        {
+            case 0: // Audio (defualt)
+            obj_ledcontrol.MODE = mode.audiobars;
+            debug("Mode= audiobars");
+            break;
+            
+            case 1: // ambi
+            obj_ledcontrol.MODE = mode.ambi;
+            debug("Mode= ambi")
+            // Reset ambilight colors cache
+            resetAmbiColors(obj_ledcontrol);
+            break;
+        }
+        
     }
     break;
     
-    case applyButton:
-    with(obj_ledcontrol){instance_destroy()}
-    instance_create(0,0,obj_ledcontrol)
+    case minimizeBtn: // Minimize to tray
+    if(!inTray)
+    {
+        hobbl_com_systray_add(hwnd_main, hobbl_com_window_gettext(hwnd_main), TRAY_NUM_CIRCLE);
+        hobbl_com_systray_prepareballoon(hobbl_com_window_gettext(hwnd_main),"Minimized to tray!",100,api_niif_user | api_niif_nosound); // Set balloon settings
+        hobbl_com_systray_setballoon(hwnd_main,TRAY_NUM_CIRCLE); // Display the balloon
+        hobbl_com_window_show(hwnd_main, api_sw_hide);
+        inTray = true;
+    }
+    break;
+    
+    case TRAY_WND_RESTORE: // restore window
+    if(inTray)
+    {
+        // Prevent some weird bug?
+        if(hobbl_com_check_secondarycommand(1) == -514 || hobbl_com_check_secondarycommand(1) == -515) // Idek why this is
+        {
+            inTray = false;
+            // Remove from tray
+            hobbl_com_systray_remove(hwnd_main, TRAY_NUM_CIRCLE)
+            // Restore window
+            hobbl_com_window_show(hwnd_main, api_sw_show)
+            hobbl_com_window_setexstyle(hwnd_main, api_ws_ex_topmost)
+            show_debug_message("Window restored!")
+        }
+    }
+    break;
+    
+    
+    
+    case applyButton: // Apply settings
     
     with(obj_ledcontrol)
     {
-        MODE = 2;
-        brightness = 0; // all rgb values get multiplied by this
-        audioMultiplier = 1; // peak val gets multiplied by this
-        deviceSlot = 0;
-        maxErrors = 5;
+        //MODE = ;
+        if(hobbl_com_edit_getline(obj_gui.brightnessEdit, 0) != "")
+        {
+            brightness = real(hobbl_com_edit_getline(obj_gui.brightnessEdit, 0));
+            debug(brightness)
+        }
+        
+        if(hobbl_com_edit_getline(obj_gui.ampMultiEdit, 0) != "")
+        {
+            audioMultiplier = real(hobbl_com_edit_getline(obj_gui.ampMultiEdit, 0));
+        }
+        
+        if(hobbl_com_edit_getline(obj_gui.maxErrsBox, 0) != "")
+        {
+            debug(int64(hobbl_com_edit_getline(obj_gui.maxErrsBox, 0)))
+            obj_ledcontrol.maxErrors = int64(hobbl_com_edit_getline(obj_gui.maxErrsBox, 0));
+        }
+        
+        
+        
+        /*if(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0))
+        {
+            
+        }
+        else
+        {
+        leftrgb[0] = int64(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0));
+        leftrgb[1] = int64(hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0));
+        leftrgb[2] = int64(hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0));
+        }
+        
+        if(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0))
+        {
+            
+        }
+        else
+        {
+        rightrgb[0] = int64(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0));
+        rightrgb[1] = int64(hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0));
+        rightrgb[2] = int64(hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0));
+        }*/
+        
+        leftrgb[0] = (int64(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0)));
+        leftrgb[1] = (int64(hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0)));
+        leftrgb[2] = (int64(hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0)));
+        
+        rightrgb[0] = (int64(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0)));
+        rightrgb[1] = (int64(hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0)));
+        rightrgb[2] = (int64(hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0)));
+        
+        // Overdrive
+        savedrgb[0,0] = leftrgb[0]
+        savedrgb[0,1] = leftrgb[1]
+        savedrgb[0,2] = leftrgb[2]
+        savedrgb[1,0] = rightrgb[0]
+        savedrgb[2,1] = rightrgb[1]
+        savedrgb[3,2] = rightrgb[2]
+        
+        //deviceSlot = hobbl_com_combobox_getsel(cboxDevice);
+       
     }
     
-    show_message(hobbl_com_combobox_gettext(brightnessEdit, 0))
+
+    // audio
+    hobbl_com_edit_setsel(setAmplitudeMultiLabel, 0,999);
+    hobbl_com_edit_replaceselection(setAmplitudeMultiLabel, 0, "-> Amplitude multiplier: "+ string(obj_ledcontrol.audioMultiplier));
+    //brightness
+    hobbl_com_edit_setsel(setBrightnessLabel, 0,999);
+    hobbl_com_edit_replaceselection(setBrightnessLabel, 0, "-> Brightness: "+ string(obj_ledcontrol.brightness));
+    //errstack
+    hobbl_com_edit_setsel(setErrstackLabel, 0,999);
+    hobbl_com_edit_replaceselection(setErrstackLabel, 0, "-> Error Stack: "+ string(obj_ledcontrol.maxErrors));
     
+    
+    //left rgb
+    hobbl_com_edit_setsel(setLeftRGBLabel, 0,999);
+    hobbl_com_edit_replaceselection(setLeftRGBLabel, 0, "-> Left side RGB: ("+string(obj_ledcontrol.leftrgb[0])+ ","+string(obj_ledcontrol.leftrgb[1])+","+string(obj_ledcontrol.leftrgb[2])+")");
+    
+   //right rgb
+    hobbl_com_edit_setsel(setRightRGBLabel, 0,999);
+    hobbl_com_edit_replaceselection(setRightRGBLabel, 0, "-> Right side RGB: ("+string(obj_ledcontrol.rightrgb[0])+ ","+string(obj_ledcontrol.rightrgb[1])+","+string(obj_ledcontrol.rightrgb[2])+")");
+
     break;
 }
 
 #event other_game_start Window handles
 hwnd_GM = int64(window_handle());
-hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu, api_ws_ex_topmost);
+hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu,0/* api_ws_ex_topmost*/);
+// res
+ico_main = hobbl_com_resource_loadicon("res/circle.ico")
+ico_minimize = hobbl_com_resource_loadicon("res/minimize.ico")
+bm_main = hobbl_com_resource_loadbitmap("res/circle.bmp")
+// tray
+inTray = false;
+// mode
 
-//ico_main = hobbl_com_resource_loadicon("main.ico")
-
-//ico_syringe =  hobbl_com_resource_loadicon("syringe.ico")
-
-//bm_injector = hobbl_com_resource_loadbitmap("icon.bmp")
-
-//ico_minimize = hobbl_com_resource_loadicon("minimize.ico")
 
 hobbl_com_window_settext(hwnd_main, "AmoTek Desktop");
-//hobbl_com_window_seticon(hwnd_main, ico_syringe);
+
+hobbl_com_window_seticon(hwnd_main, ico_main);
 
 // Embed GM window into other window
 hobbl_com_window_setparent(hwnd_GM, hwnd_main)
@@ -70,42 +188,24 @@ hobbl_com_window_setparent(hwnd_GM, hwnd_main)
 hobbl_com_window_setzorder(hwnd_GM, api_hwnd_top)
 
 hobbl_com_window_setpos(hwnd_GM, 0,270)
-#section Settings
-inTray = false;
-
-devicePort = 0;
-leftRed = 200;
-leftGreen = 0;
-leftBlue = 0;
-
-rightRed = 0;
-rightGreen = 200;
-rightBlue = 0;
-
-audioMultiplier = 1;
-brightnessMultiplier = 1;
-maxErrors = 3;
 #section Controls
 hobbl_com_check_set(1, hwnd_main) // checking slot
 
 // Top bar thing
 stb_cont = hobbl_com_edit_create(hwnd_main, 5, 8, 250, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(stb_cont, 0,0);
-hobbl_com_edit_replaceselection(stb_cont, 0, "AmoTek Desktop - " + string(GM_version) + " Runtime ver. " + string(GM_runtime_version));
+hobbl_com_edit_replaceselection(stb_cont, 0, "AmoTek Desktop - " + string(getLocalVersion()) + " Runtime ver. " + string(GM_runtime_version));
 
 main_area_begin = 32;
 // Device slot settings
 deviceSlotLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 80, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(deviceSlotLabel, 0,0);
-hobbl_com_edit_replaceselection(deviceSlotLabel, 0, "Device slot (0-4):");
+hobbl_com_edit_replaceselection(deviceSlotLabel, 0, "Mode:");
 
-cboxDevice = hobbl_com_combobox_create(hwnd_main, 100,main_area_begin, 100, 20, api_cbs_hasstrings | api_cbs_dropdownlist | api_cbs_simple, 0);
-hobbl_com_combobox_addstring(cboxDevice, "Slot 0")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 1")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 2")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 3")
-hobbl_com_combobox_addstring(cboxDevice, "Slot 4")
-
+cboxMode = hobbl_com_combobox_create(hwnd_main, 100 ,main_area_begin, 100, 20, api_cbs_hasstrings | api_cbs_dropdownlist | api_cbs_simple, 0);
+hobbl_com_combobox_addstring(cboxMode, "Audio")
+hobbl_com_combobox_addstring(cboxMode, "Ambi")
+hobbl_com_combobox_setsel(cboxMode, 0);
 // device slot end
 // maxerrs
 
@@ -113,7 +213,7 @@ maxErrsLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+45, 125, 20, 
 hobbl_com_edit_setsel(maxErrsLabel, 0,0);
 hobbl_com_edit_replaceselection(maxErrsLabel, 0, "Max. Error Stack");
 
-maxErrsBox = hobbl_com_combobox_create(hwnd_main, 130, main_area_begin+40, 30, 18, api_cbs_simple, 0);
+maxErrsBox = hobbl_com_edit_create(hwnd_main, 130, main_area_begin+40, 30, 18, api_es_left, 0);
 
 
 // maxerrs end
@@ -124,32 +224,32 @@ colorLabelLeft = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 150, 20,
 hobbl_com_edit_setsel(colorLabelLeft, 0,0);
 hobbl_com_edit_replaceselection(colorLabelLeft, 0, "Left side color (R/G/B), 0-255:");
 
-leftRedEdit = hobbl_com_combobox_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_cbs_simple, 0);
-leftGreenEdit = hobbl_com_combobox_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_cbs_simple, 0);
-leftBlueEdit = hobbl_com_combobox_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+leftRedEdit = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_es_left, 0);
+leftGreenEdit = hobbl_com_edit_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_es_left, 0);
+leftBlueEdit = hobbl_com_edit_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_es_left, 0);
 
 main_area_begin = 150;
 colorLabelRight = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 150, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(colorLabelRight, 0,0);
 hobbl_com_edit_replaceselection(colorLabelRight, 0, "Right side color (R/G/B), 0-255:");
 
-rightRedEdit = hobbl_com_combobox_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_cbs_simple, 0);
-rightGreenEdit = hobbl_com_combobox_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_cbs_simple, 0);
-rightBlueEdit = hobbl_com_combobox_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_cbs_simple, 0);
+rightRedEdit = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_es_left, 0);
+rightGreenEdit = hobbl_com_edit_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_es_left, 0);
+rightBlueEdit = hobbl_com_edit_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_es_left, 0);
 // end color
 // Amplitude Multiplier
 ampMultiLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+50, 125, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(ampMultiLabel, 0,0);
 hobbl_com_edit_replaceselection(ampMultiLabel, 0, "Audio multiplier (default: 1)");
 
-ampMultiEdit = hobbl_com_combobox_create(hwnd_main, 130, main_area_begin+45, 30, 18, api_cbs_simple , 0);
+ampMultiEdit = hobbl_com_edit_create(hwnd_main, 130, main_area_begin+45, 30, 18, api_es_left , 0);
 
 // Brightness multiplier
 brightnessLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+80, 125, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(brightnessLabel, 0,0);
 hobbl_com_edit_replaceselection(brightnessLabel, 0, "Brightness (0.0 to 1.0)");
 
-brightnessEdit = hobbl_com_combobox_create(hwnd_main, 130, main_area_begin+75, 30, 18, api_cbs_simple, 0);
+brightnessEdit = hobbl_com_edit_create(hwnd_main, 130, main_area_begin+75, 30, 18, api_es_left, 0);
 
 
 //--------------------------------- Buttons
@@ -157,6 +257,11 @@ main_area_begin = 230;
 // Apply button
 applyButton = hobbl_com_button_create(hwnd_main,  200,main_area_begin , 80, 20, 0,0);
 hobbl_com_control_settext(applyButton, "Apply!");
+
+// Minimize btn
+minimizeBtn =  hobbl_com_button_create(hwnd_main,  418 ,8 , 64, 20, 0,0);
+hobbl_com_control_settext(minimizeBtn, "minimize");
+hobbl_com_button_setimage(minimizeBtn, 1, ico_minimize)
 
 // Control read only views
 area_begin_x = 300;
@@ -173,9 +278,6 @@ hobbl_com_edit_setsel(bsInitializedLabel, 0,0);
 hobbl_com_edit_replaceselection(bsInitializedLabel, 0, "LED initialized: unknown");
 
 //--------------------------------------------- audio reader
-// connection
-
-// connection
 arConnectionLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+50, 200, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(arConnectionLabel, 0,0);
 hobbl_com_edit_replaceselection(arConnectionLabel, 0, "AudioDevice connection: unknown");
@@ -210,10 +312,131 @@ hobbl_com_edit_setsel(setBrightnessLabel, 0,0);
 hobbl_com_edit_replaceselection(setBrightnessLabel, 0, "-> Brightness: ?");
 
 // Errstack Multi
-setBrightnessLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+185, 200, 18, api_es_left | api_es_readonly, 0);
-hobbl_com_edit_setsel(setBrightnessLabel, 0,0);
-hobbl_com_edit_replaceselection(setBrightnessLabel, 0, "-> Error Stack: ?");
+setErrstackLabel = hobbl_com_edit_create(hwnd_main, area_begin_x, area_begin_y+185, 200, 18, api_es_left | api_es_readonly, 0);
+hobbl_com_edit_setsel(setErrstackLabel, 0,0);
+hobbl_com_edit_replaceselection(setErrstackLabel, 0, "-> Error Stack: ?");
 
 
 #section Create object
 instance_create(0,0,obj_ledcontrol);
+#section Update app
+downloadVersionFile = -1;
+updateAppInit()
+#section Autostart
+//autostart();
+var conffile = working_directory + "startupconf";
+if(!file_exists(conffile))
+{
+    if(hobbl_com_dialog_messagebox(0, "Add to startup?","Do you want to add this to your autostart programs?", api_mb_yesno) == 6) // yes
+    {
+        removeAutostart();
+        autostart();
+    }
+    else
+    {
+        // nope
+        removeAutostart();
+    }
+    var f = file_text_open_write(conffile);
+    file_text_write_string(f, string(getLocalVersion()))
+    file_text_close(f)
+}
+else
+if(file_exists(conffile))// Update
+{
+    var f = file_text_open_read(conffile)
+    var verstrFile = file_text_read_string(f); // read version for hkey
+    file_text_close(f)
+    
+    // compare 
+    if(int64(verstrFile) < int64(getLocalVersion()))
+    {
+        // There was an update
+        if(hobbl_com_dialog_messagebox(0, "Seems like you installed an update! Should the new version be added to the autostart again? (Old version will be removed.)","Do you want to add this to your autostart programs?", api_mb_yesno) == 6) // yes
+        {
+            removeAutostart();
+            autostart();
+        }
+        else
+        {
+            // nope
+            removeAutostart();
+        }
+        // Write to the file
+        var f = file_text_open_write(conffile);
+        file_text_write_string(f, string(getLocalVersion()))
+        file_text_close(f)
+    }
+    
+}
+#section drimscrom prensence
+//gmrpc_init("974552575716237342");
+//gmrpc_setPresence("In settings", "Version "+string(getLocalVersion()), "icon512","");
+#section GMAMBI
+gmambi_init();
+
+//gmambi_print(700,700);
+debug("cols")
+debug(gmambi_pixel_red(1918,1078));
+debug(gmambi_pixel_green(1918,1078));
+debug(gmambi_pixel_blue(1918,1078));
+
+
+#event async_http Update callback
+if(ds_map_find_value(async_load, "id") == downloadVersionFile) 
+{
+    //is downloaded, read from
+    if(async_load[?"status"] == 1)
+    {
+        debug("downloading")
+    }
+    
+    if(ds_map_find_value(async_load, "status") == 0)
+    {
+        debug("Finished download!")
+        if(file_exists(working_directory + "master_version.txt"))
+        {
+            // Read origin/master file
+            var file = file_text_open_read(working_directory + "master_version.txt");
+            var verstring_master = file_text_read_string(file);
+            var verstring_local = APPVERSION;
+            debug(verstring_master)
+            file_text_close(file);
+            
+            // Read local file
+            if(file_exists(working_directory + "version.txt"))
+            {
+                file = file_text_open_read(working_directory + "version.txt");
+                verstring_local = file_text_read_string(file);
+                file_text_close(file);
+            }
+            
+            
+            // Compare versions
+            debug("master ver: " + string(int64(verstring_master)))
+            debug("local ver: "+string(int64(verstring_local)))
+            
+            if(int64(verstring_master) > int64(verstring_local))
+            {
+                /// Joa hier wird dann halt eigentlich das update installiert....
+// Einrückung muss so...
+var _infostring = "
+    UPDATE AVAILABLE
+-------------------------------------------------------------
+    Local Version: " + string(verstring_local) + " (Compiled on "+ date_date_string(GM_build_date) + ")"+"
+    Master version: " + verstring_master + 
+"
+    The update does not get installed automatically.
+    This is just a friendly reminder.
+    Updates can be found on GitHub: 
+    https://github.com/sam-k0/AmoTek_Desktop
+    
+    If you do not want to receive these notifications anymore,
+    edit the 'version.txt' and set the value to 99999999999.
+"
+                
+                hobbl_com_dialog_showabout(0, "Update available",_infostring, 0)
+            }
+        }
+    }
+}
