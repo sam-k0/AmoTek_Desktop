@@ -8,6 +8,53 @@
   <parentName>&lt;undefined&gt;</parentName>
   <maskName>&lt;undefined&gt;</maskName>
   <events>
+    <event eventtype="2" enumb="1">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Discord update
+if(useDiscord)
+{
+var modestring;
+
+if(obj_ledcontrol.MODE == mode.ambi)
+{
+    modestring = "Ambilight mode";
+}
+else
+{
+    modestring = "Music visualizer mode";
+}
+
+if(!inTray)
+{
+    var diff = date_second_span(date_create_datetime(1970,1,1,1,0,0), date_current_datetime());
+    gmrpc_setStarttime(diff);
+    
+    var verstringBeautified = string(getLocalVersion());
+    verstringBeautified=string_insert(".",verstringBeautified ,5);
+    verstringBeautified=string_insert( ".",verstringBeautified,8);
+    gmrpc_setPresence("Ver. "+ verstringBeautified, modestring, "icon512", "");
+}
+}
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
     <event eventtype="2" enumb="0">
       <action>
         <libid>1</libid>
@@ -96,6 +143,8 @@ switch(cmd)
             case 0: // Audio (defualt)
             obj_ledcontrol.MODE = mode.audiobars;
             debug("Mode= audiobars");
+             // update discord
+             bumpDiscordUpdate();
             break;
             
             case 1: // ambi
@@ -103,6 +152,8 @@ switch(cmd)
             debug("Mode= ambi");
             // Reset ambilight colors cache
             resetAmbiColors(obj_ledcontrol);
+            // Discord
+            bumpDiscordUpdate();
             break;
         }
         
@@ -117,6 +168,9 @@ switch(cmd)
         hobbl_com_systray_setballoon(hwnd_main,TRAY_NUM_CIRCLE); // Display the balloon
         hobbl_com_window_show(hwnd_main, api_sw_hide);
         inTray = true;
+        
+        // Exit discord
+        gmrpc_exit();
     }
     break;
     
@@ -133,6 +187,10 @@ switch(cmd)
             hobbl_com_window_show(hwnd_main, api_sw_show)
             hobbl_com_window_setexstyle(hwnd_main, api_ws_ex_topmost)
             show_debug_message("Window restored!")
+            // discord reinit
+            gmrpc_init("974552575716237342");
+            
+            alarm[1] = 60;
         }
     }
     break;
@@ -307,6 +365,30 @@ var _infostring = "
         }
     }
 }
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="7" enumb="3">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>//// free discord
+gmrpc_exit();
 </string>
           </argument>
         </arguments>
@@ -633,8 +715,18 @@ if(file_exists(conffile))// Update
           <argument>
             <kind>1</kind>
             <string>/// drimscrom prensence
-//gmrpc_init("974552575716237342");
-//gmrpc_setPresence("In settings", "Version "+string(getLocalVersion()), "icon512","");
+useDiscord = false;
+ini_open("config.tek");
+useDiscord = bool(ini_read_real("rpc","enable",0))
+ini_close();
+
+if(useDiscord)
+{
+    gmrpc_init("974552575716237342");
+
+    alarm[1] = 60;
+}
+
 </string>
           </argument>
         </arguments>
