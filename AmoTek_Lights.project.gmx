@@ -122,7 +122,9 @@
     <sprite>sprites\spr_GUI</sprite>
     <sprite>sprites\spr_ledicon</sprite>
   </sprites>
-  <backgrounds name="background"/>
+  <backgrounds name="background">
+    <background>background\bg_windows</background>
+  </backgrounds>
   <paths name="paths"/>
   <scripts name="scripts">
     <script>scripts\resetLights.gml</script>

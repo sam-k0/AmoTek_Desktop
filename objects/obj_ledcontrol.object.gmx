@@ -474,7 +474,7 @@ switch(MODE)
         // Only continue if all LEDS have their color set accordingly
         for (i=0; i&lt;maxAudioLed; i+=1)
         {
-            var correct = (in_range(getCacheRed(i), rightrgb[0]*brightness,10) &amp;&amp; 
+            var correct = ( in_range(getCacheRed(i), rightrgb[0] * brightness,10) &amp;&amp; 
                             in_range(getCacheGreen(i), rightrgb[1]*brightness,10) &amp;&amp; 
                             in_range(getCacheBlue(i), rightrgb[2]*brightness, 10));
         
@@ -532,9 +532,9 @@ switch(MODE)
                 var ledindex = j;
                 debug(string(ledindex)); // debug print of led
                 // Check if already right color (with tolerance)
-                var correct = (in_range( ambicolors[ledindex, 0],red*brightness,10) &amp;&amp; 
-                                in_range(ambicolors[ledindex, 1], green*brightness,10) &amp;&amp; 
-                                in_range(ambicolors[ledindex, 2], blue*brightness, 10));
+                var correct = (in_range( ambicolors[clamp(ledindex,0,32), 0], red*brightness,10) &amp;&amp; 
+                                in_range(ambicolors[clamp(ledindex,0,32), 1], green*brightness,10) &amp;&amp; 
+                                in_range(ambicolors[clamp(ledindex,0,32), 2], blue*brightness, 10));
                         
                 if(correct)  // If the light is already correct (in cache) continue and do nothing  
                 {
@@ -546,9 +546,9 @@ switch(MODE)
                 {
                     // the light was updated
                     // store in cache (with brightness applied!)
-                    ambicolors[ledindex, 0] = red*brightness;
-                    ambicolors[ledindex, 1] = green*brightness;
-                    ambicolors[ledindex, 2] = blue*brightness;
+                    ambicolors[clamp(ledindex,0,32), 0] = red*brightness;
+                    ambicolors[clamp(ledindex,0,32), 1] = green*brightness;
+                    ambicolors[clamp(ledindex,0,32), 2] = blue*brightness;
                 }
             }
         }       
@@ -629,17 +629,11 @@ for (i=0; i&lt;32; i+=1)
 };
 
 // Text
-draw_set_color(c_white)
-draw_text(x,y,"fps"+string(fps_real))
+draw_set_color(c_black)
+draw_text(x,y,"LED Preview - fps: "+string(fps_real))
 
 
-// OVERDRIVE
-if(maxAudioLed &gt; 30)
-{
-    draw_set_halign(fa_center)
-    draw_text(room_width/2, room_height/2-5, "OVERLOAD")
-    draw_set_halign(fa_left)
-}
+
 
 </string>
           </argument>
