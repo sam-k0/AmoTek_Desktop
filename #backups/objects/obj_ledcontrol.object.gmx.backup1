@@ -1,4 +1,4 @@
-// 2022-05-30 22:21:34
+// 2022-08-15 16:31:07
 #event properties (no comments/etc. here are saved)
 parent_index = -1;
 uses_physics = false;
@@ -179,6 +179,20 @@ for (i=0; i<32; i+=1)
     }
 }
 
+#section Read config file for colors
+
+ini_open("config.tek");
+var col = scr_listToColor(json_decode(ini_read_string("startup_config","leftcolor", "[0,200,200]")));
+leftrgb[0] = color_get_red(col);
+leftrgb[1] = color_get_green(col);
+leftrgb[2] = color_get_blue(col);
+
+var col = scr_listToColor(json_decode(ini_read_string("startup_config","rightcolor", "[200,0,200]")));
+rightrgb[0] = color_get_red(col);
+rightrgb[1] = color_get_green(col);
+rightrgb[2] = color_get_blue(col);
+
+ini_close();
 
 #event destroy Free
 var success = false;
@@ -329,7 +343,7 @@ switch(MODE)
         // Only continue if all LEDS have their color set accordingly
         for (i=0; i<maxAudioLed; i+=1)
         {
-            var correct = (in_range(getCacheRed(i), rightrgb[0]*brightness,10) && 
+            var correct = ( in_range(getCacheRed(i), rightrgb[0] * brightness,10) && 
                             in_range(getCacheGreen(i), rightrgb[1]*brightness,10) && 
                             in_range(getCacheBlue(i), rightrgb[2]*brightness, 10));
         
@@ -387,9 +401,9 @@ switch(MODE)
                 var ledindex = j;
                 debug(string(ledindex)); // debug print of led
                 // Check if already right color (with tolerance)
-                var correct = (in_range( ambicolors[ledindex, 0],red*brightness,10) && 
-                                in_range(ambicolors[ledindex, 1], green*brightness,10) && 
-                                in_range(ambicolors[ledindex, 2], blue*brightness, 10));
+                var correct = (in_range( ambicolors[clamp(ledindex,0,32), 0], red*brightness,10) && 
+                                in_range(ambicolors[clamp(ledindex,0,32), 1], green*brightness,10) && 
+                                in_range(ambicolors[clamp(ledindex,0,32), 2], blue*brightness, 10));
                         
                 if(correct)  // If the light is already correct (in cache) continue and do nothing  
                 {
@@ -401,14 +415,15 @@ switch(MODE)
                 {
                     // the light was updated
                     // store in cache (with brightness applied!)
-                    ambicolors[ledindex, 0] = red*brightness;
-                    ambicolors[ledindex, 1] = green*brightness;
-                    ambicolors[ledindex, 2] = blue*brightness;
+                    ambicolors[clamp(ledindex,0,32), 0] = red*brightness;
+                    ambicolors[clamp(ledindex,0,32), 1] = green*brightness;
+                    ambicolors[clamp(ledindex,0,32), 2] = blue*brightness;
                 }
             }
         }       
         gmambi_cache_clear(); // reset the cache
     }
+    
     
     break;
 }
@@ -441,17 +456,11 @@ for (i=0; i<32; i+=1)
 };
 
 // Text
-draw_set_color(c_white)
-draw_text(x,y,"fps"+string(fps_real))
+draw_set_color(c_black)
+draw_text(x,y,"LED Preview - fps: "+string(fps_real))
 
 
-// OVERDRIVE
-if(maxAudioLed > 30)
-{
-    draw_set_halign(fa_center)
-    draw_text(room_width/2, room_height/2-5, "OVERLOAD")
-    draw_set_halign(fa_left)
-}
+
 
 
 #event keypress:vk_space Reset LIGHTS

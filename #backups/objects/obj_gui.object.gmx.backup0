@@ -1,4 +1,4 @@
-// 2022-05-30 22:14:12
+// 2022-08-15 16:23:35
 #event properties (no comments/etc. here are saved)
 parent_index = -1;
 sprite_index = spr_GUI;
@@ -6,6 +6,32 @@ uses_physics = false;
 
 #event alarm0 Set GMWINDOW invisible
 hobbl_com_window_show(hwnd_GM, api_sw_hide);
+
+#event alarm1 Discord update
+if(useDiscord)
+{
+var modestring;
+
+if(obj_ledcontrol.MODE == mode.ambi)
+{
+    modestring = "Ambilight mode";
+}
+else
+{
+    modestring = "Music visualizer mode";
+}
+
+if(!inTray)
+{
+    var diff = date_second_span(date_create_datetime(1970,1,1,1,0,0), date_current_datetime());
+    gmrpc_setStarttime(diff);
+    
+    var verstringBeautified = string(getLocalVersion());
+    verstringBeautified=string_insert(".",verstringBeautified ,5);
+    verstringBeautified=string_insert( ".",verstringBeautified,8);
+    gmrpc_setPresence("Ver. "+ verstringBeautified, modestring, "icon512", "");
+}
+}
 
 #event step Main program GUI 
 /// End the game if window is closed
@@ -34,6 +60,8 @@ switch(cmd)
             case 0: // Audio (defualt)
             obj_ledcontrol.MODE = mode.audiobars;
             debug("Mode= audiobars");
+             // update discord
+             bumpDiscordUpdate();
             break;
             
             case 1: // ambi
@@ -41,6 +69,8 @@ switch(cmd)
             debug("Mode= ambi");
             // Reset ambilight colors cache
             resetAmbiColors(obj_ledcontrol);
+            // Discord
+            bumpDiscordUpdate();
             break;
         }
         
@@ -55,6 +85,9 @@ switch(cmd)
         hobbl_com_systray_setballoon(hwnd_main,TRAY_NUM_CIRCLE); // Display the balloon
         hobbl_com_window_show(hwnd_main, api_sw_hide);
         inTray = true;
+        
+        // Exit discord
+        gmrpc_exit();
     }
     break;
     
@@ -71,6 +104,10 @@ switch(cmd)
             hobbl_com_window_show(hwnd_main, api_sw_show)
             hobbl_com_window_setexstyle(hwnd_main, api_ws_ex_topmost)
             show_debug_message("Window restored!")
+            // discord reinit
+            gmrpc_init("974552575716237342");
+            
+            alarm[1] = 60;
         }
     }
     break;
@@ -370,8 +407,18 @@ if(file_exists(conffile))// Update
     
 }
 #section drimscrom prensence
-//gmrpc_init("974552575716237342");
-//gmrpc_setPresence("In settings", "Version "+string(getLocalVersion()), "icon512","");
+useDiscord = false;
+ini_open("config.tek");
+useDiscord = bool(ini_read_real("rpc","enable",0))
+ini_close();
+
+if(useDiscord)
+{
+    gmrpc_init("974552575716237342");
+
+    alarm[1] = 60;
+}
+
 #section GMAMBI
 gmambi_init();
 
@@ -381,6 +428,12 @@ debug(gmambi_pixel_red(1918,1078));
 debug(gmambi_pixel_green(1918,1078));
 debug(gmambi_pixel_blue(1918,1078));
 
+#section Read config for Colors
+// Is being read in ledcontrol
+
+
+#event other_game_end|/ free discord
+gmrpc_exit();
 
 #event async_http Update callback
 if(ds_map_find_value(async_load, "id") == downloadVersionFile) 

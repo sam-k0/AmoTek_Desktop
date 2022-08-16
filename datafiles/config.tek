@@ -1,2 +1,7 @@
 [rpc]
 enable=1
+[startup_config]
+colors = {"l":[0,200,200], "r":[200,0,200]}
+brightness = 1
+audioscale = 1
+errstack = 3

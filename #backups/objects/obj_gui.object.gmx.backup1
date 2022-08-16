@@ -1,4 +1,4 @@
-// 2022-05-30 22:14:10
+// 2022-05-30 22:14:12
 #event properties (no comments/etc. here are saved)
 parent_index = -1;
 sprite_index = spr_GUI;
@@ -38,7 +38,7 @@ switch(cmd)
             
             case 1: // ambi
             obj_ledcontrol.MODE = mode.ambi;
-            debug("Mode= ambi")
+            debug("Mode= ambi");
             // Reset ambilight colors cache
             resetAmbiColors(obj_ledcontrol);
             break;

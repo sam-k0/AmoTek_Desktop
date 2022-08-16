@@ -1,0 +1,9 @@
+// 2022-08-15 16:28:33
+/// scr_listToColor(list)
+///scr_listToColor(list)
+
+#args list
+
+var color = make_colour_rgb(list[|0],list[|1],list[|2]);
+ds_list_destroy(list);  
+return color;

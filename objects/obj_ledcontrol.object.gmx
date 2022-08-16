@@ -67,6 +67,8 @@ with(obj_gui)
 
 
 
+
+
 </string>
           </argument>
         </arguments>
@@ -180,13 +182,14 @@ audioPeak = ar_get_peak();
 ledlist = ds_list_create();
 
 // Target Colors
-leftrgb[0] = 200;
+leftrgb[0] = 0;
 leftrgb[1] = 0;
 leftrgb[2]= 0;
 
 rightrgb[0] = 0;
 rightrgb[1] = 0;
-rightrgb[2] = 200;
+rightrgb[2] = 0;
+
 // These are the user defined color values
 savedrgb[0,0] = leftrgb[0];
 savedrgb[0,1] = leftrgb[1];
@@ -241,6 +244,73 @@ for (i=0; i&lt;32; i+=1)
     }
 }
 
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Read config file for colors
+
+ini_open(working_directory + "config.tek");
+
+var str = ini_read_string("startup_config","colors", "ERR");
+var conf_brightness = ini_read_real("startup_config","brightness", 1)
+var conf_audioscale = ini_read_real("startup_config","audioscale", 1)
+var conf_errstack = ini_read_real("startup_config","errstack", 3)
+ini_close();
+
+// Simple settings
+// errstack
+brightness = conf_brightness; // all rgb values get multiplied by this
+audioMultiplier = conf_audioscale; // peak val gets multiplied by this
+maxErrors = conf_errstack;      // The max error tries
+
+
+if(str != "ERR") // default colors
+{
+
+var map = json_decode(str);
+var llist = map[?"l"];
+
+leftrgb[0] = llist[|0]
+leftrgb[1] = llist[|1]
+leftrgb[2] = llist[|2]
+
+// Right
+var rlist = map[?"r"];
+
+rightrgb[0] = rlist[|0];
+rightrgb[1] = rlist[|1];
+rightrgb[2] = rlist[|2];
+
+// Overdrive
+savedrgb[0,0] = leftrgb[0]
+savedrgb[0,1] = leftrgb[1]
+savedrgb[0,2] = leftrgb[2]
+savedrgb[1,0] = rightrgb[0]
+savedrgb[2,1] = rightrgb[1]
+savedrgb[3,2] = rightrgb[2]
+
+// free
+ds_map_destroy(map);
+}
+
+scr_updateGUIDisplay();
 </string>
           </argument>
         </arguments>
