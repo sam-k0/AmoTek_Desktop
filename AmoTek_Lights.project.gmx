@@ -142,6 +142,8 @@
     <script>scripts\bumpDiscordUpdate.gml</script>
     <script>scripts\scr_listToColor.gml</script>
     <script>scripts\scr_updateGUIDisplay.gml</script>
+    <script>scripts\scr_saveCurrentConfigToStartup.gml</script>
+    <script>scripts\scr_removeMaliciousCharactersFromConfig.gml</script>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fnt_overdrive</font>

@@ -195,6 +195,11 @@ switch(cmd)
     }
     break;
     
+    case saveConfigBtn:
+    show_debug_message("Saving current config to startup");
+    scr_saveCurrentConfigToStartup();
+    break;
+    
     
     
     case applyButton: // Apply settings
@@ -521,6 +526,11 @@ main_area_begin = 230;
 // Apply button
 applyButton = hobbl_com_button_create(hwnd_main,  200,main_area_begin , 80, 20, 0,0);
 hobbl_com_control_settext(applyButton, "Apply!");
+
+// Apply button
+saveConfigBtn = hobbl_com_button_create(hwnd_main, 300,8 , 100, 20, 0,0);
+hobbl_com_control_settext(saveConfigBtn, "Set as Startup");
+
 
 // Minimize btn
 minimizeBtn =  hobbl_com_button_create(hwnd_main,  418 ,8 , 64, 20, 0,0);
