@@ -1,11 +1,13 @@
 # AmoTek_Desktop
-Simple GUI program allowing for sound visualization on BS-Flex LEDs 
-**⚠️This guide is slightly outdated but still useful, the UI is self explanatory."
+Simple GUI program allowing for sound visualization AND ambilight on BS-Flex LEDs 
+
+**⚠️This guide is slightly outdated but still useful, the UI is self explanatory."**
+
 **⚠️If the update notification is annoying you, edit the "version.txt" file to 99999999.**
 
 **🠗 Instructions below the image 🠗**
 
-![screenshot](https://cdn.discordapp.com/attachments/701418364622340178/973631673151406150/1.jpg)
+![screenshot](https://cdn.discordapp.com/attachments/847831991813668907/1009783702479441920/unknown.png)
 
 **🠗 Instructions below the image 🠗**
 
