@@ -283,21 +283,20 @@ maxErrors = conf_errstack;      // The max error tries
 
 if(str != "ERR") // default colors
 {
-show_message(str)
+
 
 var map = json_decode(str);
 
 
 var llist = map[?"l"];
 
-show_message(string(llist))
 leftrgb[0] = llist[|0]
 leftrgb[1] = llist[|1]
 leftrgb[2] = llist[|2]
 
 // Right
 var rlist = map[?"r"];
-show_message(string(llist))
+
 rightrgb[0] = rlist[|0];
 rightrgb[1] = rlist[|1];
 rightrgb[2] = rlist[|2];
