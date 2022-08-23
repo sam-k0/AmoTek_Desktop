@@ -415,6 +415,31 @@ gmrpc_exit();
         <arguments>
           <argument>
             <kind>1</kind>
+            <string>/// Create loading anim
+loadingAnim = instance_create(room_width/2, room_height/2, obj_loading)
+loadingAnim.text = "Initializing";
+
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
             <string>/// Window handles
 hwnd_GM = int64(window_handle());
 hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu,0/* api_ws_ex_topmost*/);
@@ -634,6 +659,7 @@ instance_create(0,0,obj_ledcontrol);
           <argument>
             <kind>1</kind>
             <string>/// Update app
+scr_setAnimText(loadingAnim, "Checking version")
 downloadVersionFile = -1;
 updateAppInit()
 </string>
@@ -731,6 +757,7 @@ ini_close();
 
 if(useDiscord)
 {
+    scr_setAnimText(loadingAnim, "Connecting to discord")
     gmrpc_init("974552575716237342");
 
     alarm[1] = 60;
@@ -757,6 +784,7 @@ if(useDiscord)
           <argument>
             <kind>1</kind>
             <string>/// GMAMBI
+scr_setAnimText(loadingAnim, "Receiving screen handle")
 gmambi_init();
 
 //gmambi_print(700,700);

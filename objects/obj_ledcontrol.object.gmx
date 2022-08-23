@@ -26,6 +26,7 @@
           <argument>
             <kind>1</kind>
             <string>/// LED init
+scr_setAnimText(obj_gui.loadingAnim, "Initializing LEDs")
 var _string = "";
 if(checkConnection(2) == 4 &amp;&amp; initEx(0))
 {
@@ -91,6 +92,7 @@ with(obj_gui)
             <kind>1</kind>
             <string>/// Audio reader Init
 // init
+scr_setAnimText(obj_gui.loadingAnim, "Initializing WinAudioDevice")
 var _string = "";
 if(ar_init())
 {
@@ -265,7 +267,7 @@ for (i=0; i&lt;32; i+=1)
           <argument>
             <kind>1</kind>
             <string>/// Read config file for colors
-
+scr_setAnimText(obj_gui.loadingAnim, "Loading Config.tek")
 ini_open(working_directory + "config.tek");
 
 var str = ini_read_string("startup_config","colors", "ERR");
@@ -314,6 +316,34 @@ ds_map_destroy(map);
 }
 
 scr_updateGUIDisplay();
+
+
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>// Destroy loading anim
+
+with(obj_loading)
+{
+    instance_destroy()
+}
 </string>
           </argument>
         </arguments>

@@ -121,6 +121,7 @@
   <sprites name="sprites">
     <sprite>sprites\spr_GUI</sprite>
     <sprite>sprites\spr_ledicon</sprite>
+    <sprite>sprites\spr_appico</sprite>
   </sprites>
   <backgrounds name="background">
     <background>background\bg_windows</background>
@@ -144,6 +145,7 @@
     <script>scripts\scr_updateGUIDisplay.gml</script>
     <script>scripts\scr_saveCurrentConfigToStartup.gml</script>
     <script>scripts\scr_removeMaliciousCharactersFromConfig.gml</script>
+    <script>scripts\scr_setAnimText.gml</script>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fnt_overdrive</font>
@@ -153,6 +155,7 @@
     <objects name="child">
       <object>objects\obj_ledcontrol</object>
     </objects>
+    <object>objects\obj_loading</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\room0</room>
