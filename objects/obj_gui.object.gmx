@@ -41,8 +41,8 @@ else
 
 if(!inTray)
 {
-    var diff = date_second_span(date_create_datetime(1970,1,1,1,0,0), date_current_datetime());
-    gmrpc_setStarttime(diff);
+   // var diff = date_second_span(date_create_datetime(1970,1,1,1,0,0), date_current_datetime());
+    //gmrpc_setStarttime(diff);
     
     var verstringBeautified = string(getLocalVersion());
     verstringBeautified=string_insert(".",verstringBeautified ,5);
