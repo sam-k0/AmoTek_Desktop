@@ -138,7 +138,7 @@
           <kind>12</kind>
           <help></help>
           <returnType>2</returnType>
-          <argCount>0</argCount>
+          <argCount>-1</argCount>
           <args/>
         </function>
         <function>
@@ -171,6 +171,36 @@
           <returnType>2</returnType>
           <argCount>1</argCount>
           <args>
+            <arg>2</arg>
+          </args>
+        </function>
+        <function>
+          <name>gmambi_update_bitmap</name>
+          <externalName>gmambi_update_bitmap</externalName>
+          <kind>12</kind>
+          <help></help>
+          <returnType>2</returnType>
+          <argCount>0</argCount>
+          <args/>
+        </function>
+        <function>
+          <name>gmambi_bm_free_dc</name>
+          <externalName>gmambi_bm_free_dc</externalName>
+          <kind>12</kind>
+          <help></help>
+          <returnType>2</returnType>
+          <argCount>0</argCount>
+          <args/>
+        </function>
+        <function>
+          <name>gmambi_bm_get_red</name>
+          <externalName>gmambi_bm_get_red</externalName>
+          <kind>12</kind>
+          <help></help>
+          <returnType>2</returnType>
+          <argCount>2</argCount>
+          <args>
+            <arg>2</arg>
             <arg>2</arg>
           </args>
         </function>

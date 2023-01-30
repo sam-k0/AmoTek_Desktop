@@ -167,9 +167,10 @@ turn = 0;
 ledIndex = 0;
 
 //------ Ambi
+
 AMBICHECKCOOLDOWN= 2;
 ambiCheckCooldown = AMBICHECKCOOLDOWN;
-
+ambiSide = AMBI_RIGHT; // at which side of the monitor the LEDs are beginning
 ambicolors[0,1] = 0; // ambicolors[ledindex, r/g/b]
 for(var i = 0; i &lt; 32; i++) // Fill with default values
 {
@@ -283,12 +284,11 @@ audioMultiplier = conf_audioscale; // peak val gets multiplied by this
 maxErrors = conf_errstack;      // The max error tries
 
 
-if(str != "ERR") // default colors
+if(str != "ERR") // doesnt contain error colors
 {
-
+debug("Loaded Config file for startup colors: " + str);
 
 var map = json_decode(str);
-
 
 var llist = map[?"l"];
 
@@ -296,12 +296,16 @@ leftrgb[0] = llist[|0]
 leftrgb[1] = llist[|1]
 leftrgb[2] = llist[|2]
 
+ds_list_print(llist)
+
 // Right
 var rlist = map[?"r"];
 
 rightrgb[0] = rlist[|0];
 rightrgb[1] = rlist[|1];
 rightrgb[2] = rlist[|2];
+
+ds_list_print(rlist)
 
 // Overdrive
 savedrgb[0,0] = leftrgb[0]
@@ -643,16 +647,36 @@ switch(MODE)
                 {
                     continue;
                 }
-                
-                // try changing the light of the LED
-                if(setLedLight(deviceSlot, 0, ledindex, red*brightness, green*brightness, blue*brightness))
+    
+                // Check which side the LEDs are mounted on..
+                switch(ambiSide)
                 {
-                    // the light was updated
-                    // store in cache (with brightness applied!)
-                    ambicolors[clamp(ledindex,0,32), 0] = red*brightness;
-                    ambicolors[clamp(ledindex,0,32), 1] = green*brightness;
-                    ambicolors[clamp(ledindex,0,32), 2] = blue*brightness;
+                    case AMBI_LEFT:
+                        // try changing the light of the LED
+                        if(setLedLight(deviceSlot, 0, ledindex, red*brightness, green*brightness, blue*brightness))
+                        {
+                            // the light was updated
+                            // store in cache (with brightness applied!)
+                            ambicolors[clamp(ledindex,0,32), 0] = red*brightness;
+                            ambicolors[clamp(ledindex,0,32), 1] = green*brightness;
+                            ambicolors[clamp(ledindex,0,32), 2] = blue*brightness;
+                        }
+                    break;
+                    
+                    case AMBI_RIGHT:
+                        if(setLedLight(deviceSlot, 0, 31-ledindex, red*brightness, green*brightness, blue*brightness))
+                        {
+                            // the light was updated
+                            // store in cache (with brightness applied!)
+                            ambicolors[clamp(ledindex,0,32), 0] = red*brightness;
+                            ambicolors[clamp(ledindex,0,32), 1] = green*brightness;
+                            ambicolors[clamp(ledindex,0,32), 2] = blue*brightness;
+                        }
+                    break;
                 }
+                
+                
+                
             }
         }       
         gmambi_cache_clear(); // reset the cache

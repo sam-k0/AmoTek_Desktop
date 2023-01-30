@@ -141,19 +141,36 @@ switch(cmd)
         switch(_mode)// mode here can be different than mode in enum
         {
             case 0: // Audio (defualt)
-            obj_ledcontrol.MODE = mode.audiobars;
-            debug("Mode= audiobars");
-             // update discord
-             bumpDiscordUpdate();
+                obj_ledcontrol.MODE = mode.audiobars;
+                debug("Mode= audiobars");
+                 // update discord
+                 bumpDiscordUpdate();
             break;
             
-            case 1: // ambi
-            obj_ledcontrol.MODE = mode.ambi;
-            debug("Mode= ambi");
-            // Reset ambilight colors cache
-            resetAmbiColors(obj_ledcontrol);
-            // Discord
-            bumpDiscordUpdate();
+            case 1: // ambi left
+                obj_ledcontrol.ambiSide = AMBI_LEFT;
+                debug("Mode= ambi left");
+                debug("Common ambi update")
+                obj_ledcontrol.MODE = mode.ambi;
+                // Discord
+                bumpDiscordUpdate();
+                // Reset ambilight colors cache
+                resetAmbiColors(obj_ledcontrol);
+            break;
+                
+            case 2: // ambi right
+                obj_ledcontrol.ambiSide = AMBI_RIGHT;
+                debug("Mode= ambi right");  
+                debug("Common ambi update")
+                obj_ledcontrol.MODE = mode.ambi;
+                // Discord
+                bumpDiscordUpdate();
+                // Reset ambilight colors cache
+                resetAmbiColors(obj_ledcontrol);  
+            break;
+            
+            default: // common updates
+               show_message_async("Warning: Fallthrough state found for lighting mode!");
             break;
         }
         
@@ -497,8 +514,9 @@ hobbl_com_edit_setsel(deviceSlotLabel, 0,0);
 hobbl_com_edit_replaceselection(deviceSlotLabel, 0, "Mode:");
 
 cboxMode = hobbl_com_combobox_create(hwnd_main, 100 ,main_area_begin, 100, 20, api_cbs_hasstrings | api_cbs_dropdownlist | api_cbs_simple, 0);
-hobbl_com_combobox_addstring(cboxMode, "Audio")
-hobbl_com_combobox_addstring(cboxMode, "Ambi")
+hobbl_com_combobox_addstring(cboxMode, "Audio");
+hobbl_com_combobox_addstring(cboxMode, "Ambient - Left");
+hobbl_com_combobox_addstring(cboxMode, "Ambient - Right");
 hobbl_com_combobox_setsel(cboxMode, 0);
 // device slot end
 // maxerrs
@@ -554,7 +572,7 @@ hobbl_com_control_settext(applyButton, "Apply!");
 
 // Apply button
 saveConfigBtn = hobbl_com_button_create(hwnd_main, 300,8 , 100, 20, 0,0);
-hobbl_com_control_settext(saveConfigBtn, "Set as Startup");
+hobbl_com_control_settext(saveConfigBtn, "Set as default");
 
 
 // Minimize btn

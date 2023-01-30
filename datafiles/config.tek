@@ -5,3 +5,5 @@ colors = {"l":[0,200,200], "r":[200,0,200]}
 brightness = 1
 audioscale = 1
 errstack = 3
+
+#If changing the values here doesn't work, go to %localappdata% -> AmoTek_Lights
