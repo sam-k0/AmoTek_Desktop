@@ -7,3 +7,6 @@
 [submodule "autostart"]
 	path = autostart
 	url = https://github.com/sam-k0/autostart
+[submodule "AmbilightLib"]
+	path = AmbilightLib
+	url = https://github.com/sam-k0/AmbilightLib
