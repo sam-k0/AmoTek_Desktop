@@ -305,6 +305,32 @@ switch(cmd)
     hobbl_com_edit_replaceselection(setRightRGBLabel, 0, "-&gt; Right side RGB: ("+string(obj_ledcontrol.rightrgb[0])+ ","+string(obj_ledcontrol.rightrgb[1])+","+string(obj_ledcontrol.rightrgb[2])+")");
 
     break;
+    
+    case leftColorPicker:
+        if(showColorPicker = SHOW_PREVIEW) // currently showing led preview only
+        {
+            showColorPicker = SHOW_PICKER_L;
+            instance_activate_object(obj_colpicker); // show the thing
+        }
+        else if(SHOW_PICKER_L)
+        {
+            showColorPicker = SHOW_PREVIEW;
+            instance_deactivate_object(obj_colpicker); // hide
+        }
+    break;
+    
+    case rightColorPicker:
+        if(showColorPicker = SHOW_PREVIEW) // currently showing led preview only
+        {
+            showColorPicker = SHOW_PICKER_R;
+            instance_activate_object(obj_colpicker); // show the thing
+        }
+        else if(SHOW_PICKER_R)
+        {
+            showColorPicker = SHOW_PREVIEW;
+            instance_deactivate_object(obj_colpicker); // hide
+        }
+    break;
 }
 </string>
           </argument>
@@ -457,17 +483,18 @@ loadingAnim.text = "Initializing";
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/// Window handles
+            <string>/// Window handles, res, modes
 hwnd_GM = int64(window_handle());
 hwnd_main = hobbl_com_window_create(0, window_get_x(), window_get_y(), 500, 500, api_ws_visible | api_ws_caption | api_ws_sysmenu,0/* api_ws_ex_topmost*/);
 // res
 ico_main = hobbl_com_resource_loadicon("res/circle.ico")
 ico_minimize = hobbl_com_resource_loadicon("res/minimize.ico")
 bm_main = hobbl_com_resource_loadbitmap("res/circle.bmp")
+ico_colorpicker = hobbl_com_resource_loadicon("res/colorpicker.ico")
 // tray
 inTray = false;
 // mode
-
+showColorPicker = SHOW_PREVIEW; // for the preview embed
 
 hobbl_com_window_settext(hwnd_main, "AmoTek Desktop");
 
@@ -539,7 +566,12 @@ hobbl_com_edit_replaceselection(colorLabelLeft, 0, "Left side color (R/G/B), 0-2
 leftRedEdit = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_es_left, 0);
 leftGreenEdit = hobbl_com_edit_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_es_left, 0);
 leftBlueEdit = hobbl_com_edit_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_es_left, 0);
+// color picker L
+leftColorPicker =  hobbl_com_button_create(hwnd_main,  110 ,main_area_begin+25 , 64, 20, 0,0);
+hobbl_com_control_settext(leftColorPicker, "Picker");
+hobbl_com_button_setimage(leftColorPicker, 1, ico_colorpicker)
 
+// Other side colors
 main_area_begin = 150;
 colorLabelRight = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+4, 150, 20, api_es_left | api_es_readonly, 0);
 hobbl_com_edit_setsel(colorLabelRight, 0,0);
@@ -548,6 +580,12 @@ hobbl_com_edit_replaceselection(colorLabelRight, 0, "Right side color (R/G/B), 0
 rightRedEdit = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+25, 30, 18, api_es_left, 0);
 rightGreenEdit = hobbl_com_edit_create(hwnd_main, 40, main_area_begin+25, 30, 18, api_es_left, 0);
 rightBlueEdit = hobbl_com_edit_create(hwnd_main, 75, main_area_begin+25, 30, 18, api_es_left, 0);
+
+// color picker R
+rightColorPicker =  hobbl_com_button_create(hwnd_main,  110 ,main_area_begin+25 , 64, 20, 0,0);
+hobbl_com_control_settext(rightColorPicker, "Picker");
+hobbl_com_button_setimage(rightColorPicker, 1, ico_colorpicker)
+
 // end color
 // Amplitude Multiplier
 ampMultiLabel = hobbl_com_edit_create(hwnd_main, 5, main_area_begin+50, 125, 20, api_es_left | api_es_readonly, 0);

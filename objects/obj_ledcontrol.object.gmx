@@ -747,17 +747,29 @@ freeDevice(0); // Release LEDS
             <kind>1</kind>
             <string>/// draw preview and render
 draw_set_font(fnt_overdrive)
+toptext = "default";
 
-sprw = sprite_get_width(spr_ledicon);
-for (i=0; i&lt;32; i+=1)
+// draw preview
+
+if(obj_gui.showColorPicker == SHOW_PREVIEW) // only show when not showing colpicker
 {
-    draw_sprite_ext(spr_ledicon, 0, (room_width - sprw-5)-sprw*i, room_height/2,1,1,0,make_color_rgb(colors[i,0],colors[i,1],colors[i,2] ),brightness)
-    draw_set_colour(-1)
-};
+    sprw = sprite_get_width(spr_ledicon);
+    for (i=0; i&lt;32; i+=1)
+    {
+        draw_sprite_ext(spr_ledicon, 0, (room_width - sprw-5)-sprw*i, room_height/2,1,1,0,make_color_rgb(colors[i,0],colors[i,1],colors[i,2] ),brightness)
+        draw_set_colour(-1)
+    };
+    
+    toptext = "LED Preview - fps: "+string(fps_real);
+}
+else // showing color picker
+{
+    toptext = "Color picker - left click to pick a color!";
+}
 
 // Text
 draw_set_color(c_black)
-draw_text(x,y,"LED Preview - fps: "+string(fps_real))
+draw_text(x,y,toptext)
 
 
 
