@@ -149,7 +149,8 @@ with(obj_gui)
 enum mode {
     audiobars,
     ambi,
-    cycle
+    cycle,
+    custom
 }
 
 resetLights();
@@ -179,6 +180,7 @@ for(var i = 0; i &lt; 32; i++) // Fill with default values
         ambicolors[i, j] = 0; // Init with 0
     }
 }
+
 
 //----- audio visualizer
 audioPeak = ar_get_peak();
@@ -348,6 +350,29 @@ with(obj_loading)
 {
     instance_destroy()
 }
+</string>
+          </argument>
+        </arguments>
+      </action>
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>/// Custom DLL bindings
+
+customDLLready = false;
 </string>
           </argument>
         </arguments>
@@ -684,6 +709,31 @@ switch(MODE)
     
     
     break;
+    
+    
+    case mode.custom:
+        // Load DLL
+        var dllpath = working_directory + "/plugins/" + "CustomLightsMod_TEK.dll";
+        if(file_exists(dllpath))
+        {
+            if(obj_ledcontrol.customDLLready == false)
+            {
+                debug("Defined External DLL")
+                external_define(dllpath, "call",dll_cdecl, ty_real, 1,ty_real);
+                //external_define(dllpath, "RegisterCallbacks",dll_cdecl, ty_real, 4,ty_string,ty_string,ty_string,ty_string);
+                obj_ledcontrol.customDLLready = true;
+            }
+            else
+            {
+                debug(external_call("call", 6));
+            }
+        }
+        else
+        {
+            debug("Custom DLL Doesnt exist")
+        }
+    break;
+    
 }
 </string>
           </argument>

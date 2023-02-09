@@ -169,6 +169,12 @@ switch(cmd)
                 resetAmbiColors(obj_ledcontrol);  
             break;
             
+            case 3: // Custom
+                obj_ledcontrol.MODE = mode.custom;
+                debug("Set to Custom mode");
+                
+            break;
+            
             default: // common updates
                show_message_async("Warning: Fallthrough state found for lighting mode!");
             break;
@@ -242,29 +248,7 @@ switch(cmd)
         }
         
         
-        
-        /*if(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0))
-        {
-            
-        }
-        else
-        {
-        leftrgb[0] = int64(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0));
-        leftrgb[1] = int64(hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0));
-        leftrgb[2] = int64(hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0));
-        }
-        
-        if(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0) == "" or hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0))
-        {
-            
-        }
-        else
-        {
-        rightrgb[0] = int64(hobbl_com_edit_getline(obj_gui.rightRedEdit, 0));
-        rightrgb[1] = int64(hobbl_com_edit_getline(obj_gui.rightGreenEdit, 0));
-        rightrgb[2] = int64(hobbl_com_edit_getline(obj_gui.rightBlueEdit, 0));
-        }*/
-        
+      
         leftrgb[0] = (int64(hobbl_com_edit_getline(obj_gui.leftRedEdit, 0)));
         leftrgb[1] = (int64(hobbl_com_edit_getline(obj_gui.leftGreenEdit, 0)));
         leftrgb[2] = (int64(hobbl_com_edit_getline(obj_gui.leftBlueEdit, 0)));
@@ -544,6 +528,7 @@ cboxMode = hobbl_com_combobox_create(hwnd_main, 100 ,main_area_begin, 100, 20, a
 hobbl_com_combobox_addstring(cboxMode, "Audio");
 hobbl_com_combobox_addstring(cboxMode, "Ambient - Left");
 hobbl_com_combobox_addstring(cboxMode, "Ambient - Right");
+hobbl_com_combobox_addstring(cboxMode, "Custom");
 hobbl_com_combobox_setsel(cboxMode, 0);
 // device slot end
 // maxerrs
