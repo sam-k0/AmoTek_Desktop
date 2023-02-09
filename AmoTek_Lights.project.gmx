@@ -3,7 +3,7 @@
   <Configs name="configs">
     <Config>Configs\Default</Config>
   </Configs>
-  <datafiles number="14" name="datafiles">
+  <datafiles number="31" name="datafiles">
     <datafile>
       <name>version.txt</name>
       <exists>-1</exists>
@@ -21,7 +21,7 @@
       </ConfigOptions>
       <filename>version.txt</filename>
     </datafile>
-    <datafiles number="14" name="res">
+    <datafiles number="31" name="res">
       <datafile>
         <name>minimize.ico</name>
         <exists>-1</exists>
@@ -125,7 +125,7 @@
       </ConfigOptions>
       <filename>config.tek</filename>
     </datafile>
-    <datafiles number="14" name="plugins">
+    <datafiles number="31" name="plugins">
       <datafile>
         <name>keepme.txt</name>
         <exists>-1</exists>
@@ -144,9 +144,9 @@
         <filename>keepme.txt</filename>
       </datafile>
       <datafile>
-        <name>PluginLoader_DefaultPlugin.dll</name>
+        <name>TEK_SakuraLightsMod.dll</name>
         <exists>-1</exists>
-        <size>957440</size>
+        <size>962048</size>
         <exportAction>2</exportAction>
         <exportDir></exportDir>
         <overwrite>0</overwrite>
@@ -158,7 +158,7 @@
             <CopyToMask>9223372036854775807</CopyToMask>
           </Config>
         </ConfigOptions>
-        <filename>PluginLoader_DefaultPlugin.dll</filename>
+        <filename>TEK_SakuraLightsMod.dll</filename>
       </datafile>
     </datafiles>
   </datafiles>
